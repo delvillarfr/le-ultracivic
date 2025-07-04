@@ -14,3 +14,28 @@
 ## Notes:
 The $PR token is pre-mined and completely vanilla (OpenZeppelin ERC20.sol with ERC20Burnable.sol and ERC20Permit.sol).
 A cron job queries the database every 20 mins and reverts "reserved" pollution rights back to "available" for pollution rights that have been reserved for more than 20 mins.
+
+# Landing Page Appearance
+It is a very simple webpage with no navbar.
+The top of the site says "Ultra Civic"
+The hero line says: "Buy + Retire Polluters' Rights to Emit __ Tons of CO2", with __ equal to 1 by default. User sets the number (1-99).
+A subtitle explains what happens:
+"Pay $24x USD; Earn x $PR (ERC-20)"
+"Improve the world by $230x USD."
+
+Below this is a textbox for users to input a custom 1-100 character message.
+"Your message for the Public History"
+The message that appears in gray and disappears when the user clicks on the message box is:
+"they will say, 'This land that was laid waste has become like the garden of Eden'" Ezequiel 36:35
+
+Below are two buttons.
+One button says: "Do It"
+The other button says: "What?"
+"Do it" initiates the flow.
+"What?" opens a modal with an explanation of the project.
+
+Below is a table titled History.
+It has three columns: the serial numbers of retired allowances, the users' messages, and the link to the transaction from Ultra Civic's Treasury to the user's wallet.
+
+At the bottom is:
+"You POC: paco@ultracivic.com"
