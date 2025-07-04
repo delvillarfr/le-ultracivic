@@ -39,3 +39,26 @@ It has three columns: the serial numbers of retired allowances, the users' messa
 
 At the bottom is:
 "You POC: paco@ultracivic.com"
+
+## Under the "What?" button
+
+Back in January 10, 2014, Vitalik mentioned a blueprint for a new kind of "economic democracy":
+... it is possible to set up currencies whose seigniorage, or issuance, goes to support certain causes, and people can vote for those causes by accepting certain currencies at their businesses.
+
+This economic system hasn't taken off. The reason: it's hard to find a public good that is easy to deliver and has well-understood benefits.
+
+Ultra Civic found one: clean air, or the stopping of CO2 emissions. One ton of CO2 is well-known to cost society in the hundreds of dollars ($230 according to the EPA), and we found how to stop a ton in the dozens.
+
+In the Northeastern U.S., coal, oil, or gas power plants must buy pollution rights to emit CO₂.
+(pollution right and arrow to power plant emitting 1tco2)
+
+Each year, states issue a fixed number of pollution rights—enough for about 20% of France + Monaco’s total CO₂ emissions (similar to the U.K.’s).
+(many happy power plants jointly emitting 80Mtco2)
+
+This matters because you can also buy pollution rights. Yes, you!
+(individual looking puzzled)
+
+Power plants will use every last one to emit exactly one ton of CO₂, unless you buy and permanently retire them first!
+(sad power plant that pollutes little. Happy you moving allowances to black no exit door.)
+
+Ultra Civic lets you retire pollution rights in one click and mints you 1 $PR (ERC-20 token) per retirement. Stopping one ton of CO₂ saves society $230 in damages (U.S. EPA). That's your social impact, U.S. state-enforced. Start here.
