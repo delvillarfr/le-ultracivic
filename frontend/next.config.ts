@@ -17,7 +17,22 @@ const nextConfig: NextConfig = {
         net: false,
         tls: false,
       };
+    } else {
+      // Server-side fallbacks to prevent issues with browser-only modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        'pino-pretty': false,
+      };
     }
+    
+    // Ignore browser-only modules on server
+    config.externals = config.externals || [];
+    if (isServer) {
+      config.externals.push({
+        'pino-pretty': 'pino-pretty',
+      });
+    }
+    
     return config;
   },
   images: {
@@ -26,6 +41,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['@walletconnect/logger'],
 };
 
 export default nextConfig;
