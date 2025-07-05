@@ -11,7 +11,9 @@ import HistoryTable from '@/components/HistoryTable';
 import Footer from '@/components/Footer';
 import Modal from '@/components/Modal';
 import WalletConnection from '@/components/WalletConnection';
+import PaymentModal from '@/components/PaymentModal';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
+import { useEthPrice } from '@/hooks/useEthPrice';
 
 export default function Home() {
   const [allowanceValue, setAllowanceValue] = useState(999);
@@ -21,8 +23,10 @@ export default function Home() {
   const [impactCalc, setImpactCalc] = useState(229770);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showWalletConnection, setShowWalletConnection] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const { isReady, address } = useWalletConnection();
+  const { ethPriceUSD, calculateEthAmount } = useEthPrice();
 
   const updateCalculations = (allowance: number) => {
     const price = allowance * 24;
@@ -71,12 +75,7 @@ export default function Home() {
       return;
     }
     
-    console.log('Payment flow initiated:', {
-      allowance: allowance,
-      price: allowance * 24,
-      message: message,
-      wallet: address
-    });
+    setShowPaymentModal(true);
   };
 
   const handleWhatClick = () => {
@@ -89,7 +88,7 @@ export default function Home() {
   
   const handleWalletConnected = () => {
     setShowWalletConnection(false);
-    handleDoItClick();
+    setShowPaymentModal(true);
   };
 
   useEffect(() => {
@@ -103,7 +102,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
-      <div className="container">
+      <div className={`container ${showPaymentModal ? 'blurred' : ''}`}>
         <Header />
         <HeroSection 
           allowanceValue={allowanceValue}
@@ -113,6 +112,7 @@ export default function Home() {
           priceCalc={priceCalc}
           tokenCalc={tokenCalc}
           impactCalc={impactCalc}
+          allowanceValue={allowanceValue}
         />
         <MessageSection 
           messageValue={messageValue}
@@ -148,6 +148,13 @@ export default function Home() {
         <p>Connect your wallet to proceed with the payment.</p>
         <WalletConnection onConnected={handleWalletConnected} />
       </Modal>
+      
+      <PaymentModal 
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        allowances={allowanceValue}
+        message={messageValue}
+      />
     </>
   );
 }
