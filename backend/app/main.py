@@ -1,8 +1,19 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
+from pydantic import ValidationError
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.api.retirements import router as retirements_router
 from app.config import settings
+from app.middleware.cors import setup_cors_middleware
+from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
+from app.middleware.validation import ValidationMiddleware
+from app.middleware.audit import AuditMiddleware, setup_audit_logging
+from app.middleware.error_handling import (
+    ErrorHandlingMiddleware,
+    http_exception_handler,
+    validation_exception_handler,
+)
 
 app = FastAPI(
     title="Ultra Civic API",
@@ -11,14 +22,26 @@ app = FastAPI(
     debug=settings.debug,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.frontend_url],
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
+# Setup audit logging
+setup_audit_logging()
 
+# Add middleware (order matters - last added is executed first)
+app.add_middleware(ErrorHandlingMiddleware)
+app.add_middleware(AuditMiddleware)
+app.add_middleware(ValidationMiddleware)
+
+# Setup CORS
+setup_cors_middleware(app)
+
+# Setup rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# Global exception handlers
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(ValidationError, validation_exception_handler)
+
+# Include routers
 app.include_router(retirements_router, prefix="/api")
 
 

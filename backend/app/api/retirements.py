@@ -1,5 +1,5 @@
 from uuid import UUID, uuid4
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -14,13 +14,16 @@ from app.schemas.retirements import (
     OrderStatus,
     ErrorResponse,
 )
+from app.middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/retirements", tags=["retirements"])
 
 
 @router.post("/", response_model=RetirementResponse)
+@limiter.limit("5/minute")
 async def create_retirement(
-    request: RetirementRequest,
+    request: Request,
+    retirement_request: RetirementRequest,
     session: AsyncSession = Depends(get_session)
 ):
     """Reserve allowances for retirement"""
@@ -29,17 +32,17 @@ async def create_retirement(
         stmt = (
             select(Allowance)
             .where(Allowance.status == "available")
-            .limit(request.num_allowances)
+            .limit(retirement_request.num_allowances)
             .with_for_update(skip_locked=True)
         )
         
         result = await session.execute(stmt)
         allowances = result.scalars().all()
         
-        if len(allowances) < request.num_allowances:
+        if len(allowances) < retirement_request.num_allowances:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Only {len(allowances)} allowances available, but {request.num_allowances} requested"
+                detail=f"Only {len(allowances)} allowances available, but {retirement_request.num_allowances} requested"
             )
         
         # Generate order ID and reserve allowances
@@ -48,8 +51,8 @@ async def create_retirement(
         for allowance in allowances:
             allowance.status = "reserved"
             allowance.order = str(order_id)
-            allowance.wallet = request.wallet
-            allowance.message = request.message
+            allowance.wallet = retirement_request.wallet
+            allowance.message = retirement_request.message
             
         await session.commit()
         
@@ -64,14 +67,16 @@ async def create_retirement(
 
 
 @router.post("/confirm", response_model=ConfirmPaymentResponse)
+@limiter.limit("5/minute")
 async def confirm_payment(
-    request: ConfirmPaymentRequest,
+    request: Request,
+    confirm_request: ConfirmPaymentRequest,
     session: AsyncSession = Depends(get_session)
 ):
     """Confirm payment was sent for an order"""
     try:
         # Verify order exists
-        stmt = select(Allowance).where(Allowance.order == str(request.order_id))
+        stmt = select(Allowance).where(Allowance.order == str(confirm_request.order_id))
         result = await session.execute(stmt)
         allowances = result.scalars().all()
         
@@ -96,7 +101,9 @@ async def confirm_payment(
 
 
 @router.get("/status/{order_id}", response_model=OrderStatusResponse)
+@limiter.limit("10/minute")
 async def get_order_status(
+    request: Request,
     order_id: UUID,
     session: AsyncSession = Depends(get_session)
 ):
