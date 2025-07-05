@@ -1,0 +1,307 @@
+@font-face {
+    font-family: 'Atkinson';
+    src: url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/WOFF2/AtkinsonHyperlegibleNext-Regular.woff2') format('woff2'),
+         url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/TTF/AtkinsonHyperlegibleNext-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --hero-height: 40px;
+    --secondary-height: calc(var(--hero-height) * 0.5);
+    --vp-main-height: calc(var(--hero-height) * 0.85);
+    --table-title-height: calc(var(--hero-height) * 0.8);
+    --table-header-height: 20px;
+    --table-header1-height: calc(var(--table-header-height) * 2.5);
+}
+
+body {
+    font-family: 'Atkinson', Arial, sans-serif;
+    background-color: #ffffff;
+    color: #000000;
+    line-height: 1.1;
+    margin: 0;
+    padding: 20px 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.title-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.title {
+    max-width: 600px;
+    height: auto;
+}
+
+.hero-section {
+    margin-bottom: 40px;
+}
+
+.hero-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.hero1, .hero2-1, .hero2-2 {
+    height: var(--hero-height);
+    width: auto;
+    vertical-align: middle;
+}
+
+.vp1-1, .vp2-1, .vp3-1 {
+    height: var(--vp-main-height);
+    width: auto;
+    vertical-align: middle;
+}
+
+.allowance-input {
+    font-family: 'Atkinson', Arial, sans-serif;
+    font-size: var(--hero-height);
+    padding: 0;
+    border: none;
+    background: transparent;
+    text-align: center;
+    width: 96px;
+    vertical-align: middle;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+.allowance-input::-webkit-outer-spin-button,
+.allowance-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.value-props {
+    margin-bottom: 40px;
+}
+
+.vp-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.vp1-2, .vp2-2, .vp3-2 {
+    height: var(--secondary-height);
+    width: auto;
+    vertical-align: middle;
+}
+
+.vp3-2 {
+    height: calc(var(--secondary-height) / 10);
+}
+
+.price-value, .token-value, .impact-value {
+    font-family: 'Atkinson', Arial, sans-serif;
+    font-size: var(--secondary-height);
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.message-section {
+    margin-bottom: 40px;
+}
+
+.message-prompt {
+    text-align: center;
+    margin-bottom: 7px;
+}
+
+.history-prompt {
+    height: var(--secondary-height);
+    width: auto;
+}
+
+.message-input-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.message-box {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    transform: scale(0.7);
+}
+
+.message-input-container textarea {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: calc(420px * 0.9);
+    height: calc(100% - 40px);
+    min-height: 80px;
+    border: none;
+    background: transparent;
+    font-family: 'Atkinson', Arial, sans-serif;
+    font-size: calc(14px * 1.3);
+    padding: 10px;
+    resize: none;
+    outline: none;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 120px;
+    margin-bottom: 60px;
+}
+
+.action-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.doit {
+    height: auto;
+    width: 180px;
+}
+
+.what {
+    height: auto;
+    width: 150px;
+}
+
+.history {
+    margin-bottom: 30px;
+}
+
+.history-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.table-title {
+    height: var(--hero-height);
+    width: auto;
+}
+
+.history-table {
+    width: 100%;
+}
+
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.header-col {
+    text-align: center;
+}
+
+.table-header1 {
+    width: auto;
+    height: var(--table-header1-height);
+}
+
+.table-header2, .table-header3 {
+    width: auto;
+    height: var(--table-header-height);
+}
+
+.table-mainline {
+    margin-bottom: 10px;
+}
+
+.main-divider {
+    width: 100%;
+    height: auto;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.row-col {
+    text-align: center;
+    font-family: 'Atkinson', Arial, sans-serif;
+    font-size: 14px;
+}
+
+.serial-number {
+    font-weight: bold;
+}
+
+.message {
+    font-style: italic;
+}
+
+.transaction {
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.table-line {
+    margin-bottom: 10px;
+}
+
+.row-divider {
+    width: 100%;
+    height: auto;
+}
+
+.contact {
+    text-align: left;
+    margin-top: 40px;
+}
+
+.contact-info {
+    max-width: 500px;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .hero-line, .vp-line {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .table-header, .table-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
