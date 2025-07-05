@@ -4,7 +4,7 @@ import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
 import { useEthPrice } from './useEthPrice'
 
-const ULTRA_CIVIC_TREASURY = '0x742d35Cc6634C0532925a3b8d4b6A9B3bC5B5e12' // Replace with actual treasury address
+const ULTRA_CIVIC_TREASURY = '0x742d35cc6634c0532925a3b8d11d2d7d2ae30b2b' // Actual treasury address
 
 export function usePayment() {
   const { calculateEthAmount } = useEthPrice()

@@ -11,8 +11,10 @@
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.2.8",
     "@tanstack/react-query": "^5.81.5",
+    "@types/pg": "^8.15.4",
     "@types/uuid": "^10.0.0",
     "next": "15.3.5",
+    "pg": "^8.16.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.1.0",

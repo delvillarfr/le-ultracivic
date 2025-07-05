@@ -1,7 +1,7 @@
 // Alchemy integration for Sepolia transaction monitoring
 
 const ALCHEMY_URL = process.env.ALCHEMY_SEPOLIA_URL || 'https://eth-sepolia.g.alchemy.com/v2/demo';
-const ULTRA_CIVIC_TREASURY = '0x742d35Cc6634C0532925a3b8d4b6A9B3bC5B5e12'; // Replace with actual treasury
+const ULTRA_CIVIC_TREASURY = process.env.ULTRA_CIVIC_TREASURY || '0x742d35cc6634c0532925a3b8d11d2d7d2ae30b2b';
 
 export interface TransactionReceipt {
   status: string;
