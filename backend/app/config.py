@@ -59,9 +59,10 @@ class Settings(BaseSettings):
 
     # 1inch API
     oneinch_api_url: str = Field(
-        default="https://api.1inch.io/v5.0/11155111",
-        description="1inch API URL for Sepolia",
+        default="https://api.1inch.dev/swap/v6.0/1",
+        description="1inch API URL for Ethereum mainnet",
     )
+    oneinch_api_key: str = Field(..., description="1inch API key")
 
     # Production-specific Configuration
     log_level: str = Field(default="INFO", description="Logging level")

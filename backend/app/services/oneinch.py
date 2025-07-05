@@ -14,14 +14,22 @@ class OneInchService:
     """Service for interacting with 1inch API for price quotes."""
 
     def __init__(self):
-        self.base_url = settings.oneinch_api_url  # https://api.1inch.io/v5.0/11155111
+        self.base_url = settings.oneinch_api_url  # https://api.1inch.dev/swap/v5.2/11155111
+        self.api_key = settings.oneinch_api_key
         self.timeout = httpx.Timeout(30.0)
         
-        # Common token addresses on Sepolia
+        # Common token addresses on Ethereum mainnet
         self.token_addresses = {
             "ETH": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",  # Native ETH
-            "USDC": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",  # USDC on Sepolia
-            "USDT": "0x7169D38820dfd117C3FA1f22a697dBA58d90BA06",  # USDT on Sepolia
+            "USDC": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",  # USDC on mainnet
+            "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",  # USDT on mainnet
+        }
+
+    def _get_headers(self) -> Dict[str, str]:
+        """Get headers for 1inch API requests."""
+        return {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
         }
 
     async def get_quote(
@@ -60,7 +68,7 @@ class OneInchService:
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url, params=params)
+                response = await client.get(url, params=params, headers=self._get_headers())
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -114,7 +122,7 @@ class OneInchService:
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url, params=params)
+                response = await client.get(url, params=params, headers=self._get_headers())
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -216,7 +224,7 @@ class OneInchService:
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url, params=params)
+                response = await client.get(url, params=params, headers=self._get_headers())
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -272,7 +280,7 @@ class OneInchService:
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.get(url)
+                response = await client.get(url, headers=self._get_headers())
                 
                 if response.status_code == 200:
                     data = response.json()
