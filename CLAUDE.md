@@ -9,7 +9,7 @@ You are a software architect helping me build the project here described in a ha
 - Backend: A FastAPI (Python) application deployed on Render, executed by uvicorn.
 - Monorepo directory structure, with the front-end in ./frontend and the backend in ./backend
 - Database: A PostgreSQL database managed by Neon. PostgreSQL driver: asyncpg. ORM layer: SQLModel. The database has a single table called “allowances”. Alembic is used for database migrations.
-- Blockchain Interaction: Alchemy for node access, OpenZeppelin Defender for secure transactions.
+- Blockchain Interaction: Alchemy for node access, Thirdweb for secure transactions.
 - Secrets: Stored in Vercel and Render environment-variable dashboards. pydantic-settings loads strongly-typed settings from env vars. python-dotenv – reads your local .env file during development.
 - Resend for sending email.
 - Dependency and code quality: Poetry to create the project and add dependencies; Ruff for linting; Black for python code formatting; pre-commit for CI; pytest+httpx to smoke-test API endpoints and make sure I don’t break them at 2AM.
