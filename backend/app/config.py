@@ -51,6 +51,17 @@ class Settings(BaseSettings):
     reservation_timeout_minutes: int = Field(
         default=15, description="Reservation timeout in minutes"
     )
+    min_confirmations: int = Field(
+        default=1, description="Minimum confirmations before processing payment"
+    )
+    
+    # Payment Processing
+    price_slippage_tolerance: float = Field(
+        default=0.05, description="Price slippage tolerance (5%)"
+    )
+    max_payment_retries: int = Field(
+        default=3, description="Maximum retries for failed payments"
+    )
 
     # Pricing
     allowance_price_usd: float = Field(

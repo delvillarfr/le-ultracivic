@@ -86,8 +86,30 @@ class BackgroundTaskManager:
             else:
                 logger.error(f"Cleanup job failed: {result.get('error')}")
                 
+                # Send email alert for cleanup failures
+                try:
+                    from app.services.email import email_service
+                    await email_service.send_system_error_alert(
+                        error_type="cleanup_job_failed",
+                        error_message=result.get('error', 'Unknown cleanup error'),
+                        context={"cleanup_result": result}
+                    )
+                except Exception as email_error:
+                    logger.error(f"Failed to send cleanup failure alert: {email_error}")
+                
         except Exception as e:
             logger.error(f"Error in cleanup job: {str(e)}")
+            
+            # Send email alert for cleanup exceptions
+            try:
+                from app.services.email import email_service
+                await email_service.send_system_error_alert(
+                    error_type="cleanup_job_exception",
+                    error_message=str(e),
+                    context={"exception_type": type(e).__name__}
+                )
+            except Exception as email_error:
+                logger.error(f"Failed to send cleanup exception alert: {email_error}")
 
     async def _run_transaction_monitoring(self) -> None:
         """Run transaction monitoring (called by scheduler)."""

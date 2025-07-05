@@ -58,6 +58,20 @@ class OrderStatusResponse(BaseModel):
     reward_tx_hash: Optional[str] = None
 
 
+class HistoryItem(BaseModel):
+    serial_numbers: list[str]  # All serial numbers for this retirement order
+    message: Optional[str] = None  # User's retirement message
+    wallet: str  # User's wallet address
+    timestamp: str  # When the retirement was completed
+    etherscan_link: Optional[str] = None  # Link to reward transaction on Etherscan
+    order_id: str  # Order ID for reference
+
+
+class HistoryResponse(BaseModel):
+    retirements: list[HistoryItem]
+    total: int  # Total number of retirement orders (not individual allowances)
+
+
 class ErrorResponse(BaseModel):
     error: str
     detail: Optional[str] = None

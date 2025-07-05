@@ -125,6 +125,20 @@ class TransactionMonitorService:
             
             if not token_result["success"]:
                 logger.error(f"Token transfer failed for order {order_id}: {token_result.get('error')}")
+                
+                # Send email alert for token transfer failure
+                try:
+                    from app.services.email import email_service
+                    await email_service.send_token_transfer_failure_alert(
+                        order_id=order_id,
+                        wallet_address=wallet_address,
+                        num_allowances=num_allowances,
+                        error_details=token_result.get('error', 'Unknown error'),
+                        thirdweb_response=token_result
+                    )
+                except Exception as email_error:
+                    logger.error(f"Failed to send token transfer failure alert: {email_error}")
+                
                 await self._mark_order_as_failed(session, order_id, f"Token transfer failed: {token_result.get('error')}")
                 return
             
@@ -139,6 +153,20 @@ class TransactionMonitorService:
                 
                 if not wait_result["success"]:
                     logger.error(f"Token transfer wait failed for order {order_id}: {wait_result.get('error')}")
+                    
+                    # Send email alert for token transfer wait failure
+                    try:
+                        from app.services.email import email_service
+                        await email_service.send_token_transfer_failure_alert(
+                            order_id=order_id,
+                            wallet_address=wallet_address,
+                            num_allowances=num_allowances,
+                            error_details=f"Token transfer wait failed: {wait_result.get('error')}",
+                            thirdweb_response=wait_result
+                        )
+                    except Exception as email_error:
+                        logger.error(f"Failed to send token transfer wait failure alert: {email_error}")
+                    
                     await self._mark_order_as_failed(session, order_id, f"Token transfer incomplete: {wait_result.get('error')}")
                     return
                 

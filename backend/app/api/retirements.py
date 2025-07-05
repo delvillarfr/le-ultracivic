@@ -10,6 +10,7 @@ from app.models.allowances import Allowance
 from app.schemas.retirements import (
     ConfirmPaymentRequest,
     ConfirmPaymentResponse,
+    HistoryResponse,
     OrderStatus,
     OrderStatusResponse,
     RetirementRequest,
@@ -17,8 +18,58 @@ from app.schemas.retirements import (
 )
 from app.services.background_manager import background_manager
 from app.services.blockchain import blockchain_service
+from app.services.payment_validator import payment_validator
+from app.services.price_service import price_service
+from app.services.reward_calculator import reward_calculator
 
 router = APIRouter(prefix="/retirements", tags=["retirements"])
+
+
+@router.get("/estimate/{num_allowances}")
+async def get_payment_estimate(
+    request: Request,
+    num_allowances: int
+):
+    """Get payment estimate for given number of allowances."""
+    try:
+        if num_allowances < 1 or num_allowances > 99:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Number of allowances must be between 1 and 99"
+            )
+        
+        # Get payment estimate
+        payment_estimate = await price_service.get_payment_estimate(num_allowances)
+        
+        if not payment_estimate["success"]:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=f"Unable to get payment estimate: {payment_estimate.get('error')}"
+            )
+        
+        # Get reward summary
+        reward_summary = reward_calculator.get_reward_summary(num_allowances)
+        
+        if not reward_summary["success"]:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Unable to calculate rewards: {reward_summary.get('error')}"
+            )
+        
+        return {
+            "success": True,
+            "num_allowances": num_allowances,
+            "payment_estimate": payment_estimate["estimate"],
+            "reward_summary": reward_summary["reward_summary"]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get estimate: {str(e)}",
+        ) from e
 
 
 @router.post("/", response_model=RetirementResponse)
@@ -76,7 +127,7 @@ async def confirm_payment(
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ):
-    """Confirm payment was sent for an order"""
+    """Confirm payment was sent for an order with enhanced validation"""
     try:
         # Verify order exists and is in reserved status
         stmt = select(Allowance).where(Allowance.order_id == str(confirm_request.order_id))
@@ -95,7 +146,42 @@ async def confirm_payment(
                 detail=f"Order is not in reserved status: {first_allowance.status}"
             )
 
-        # Store transaction hash in database
+        # Check for duplicate transaction hash
+        if first_allowance.tx_hash:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Payment already confirmed for this order"
+            )
+
+        num_allowances = len(allowances)
+        tx_hash = confirm_request.tx_hash
+
+        # Enhanced payment validation
+        validation_result = await payment_validator.validate_payment_transaction(
+            tx_hash=tx_hash,
+            num_allowances=num_allowances
+        )
+
+        if not validation_result["success"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Payment validation failed: {validation_result.get('error')}",
+            )
+
+        if not validation_result.get("valid", False):
+            # Handle pending transactions
+            if validation_result.get("status") == "pending":
+                raise HTTPException(
+                    status_code=status.HTTP_202_ACCEPTED,
+                    detail="Transaction is pending confirmation. Please wait and try again.",
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid payment: {validation_result.get('error')}",
+                )
+
+        # Store transaction hash and payment details in database
         for allowance in allowances:
             allowance.tx_hash = confirm_request.tx_hash
 
@@ -107,10 +193,21 @@ async def confirm_payment(
             str(confirm_request.order_id)
         )
 
-        return ConfirmPaymentResponse(
-            message="Payment confirmation received and is being processed",
-            status="processing"
-        )
+        # Get payment details for response
+        payment_details = validation_result.get("payment_details", {})
+        
+        return {
+            "message": "Payment confirmed and verified successfully",
+            "status": "processing",
+            "order_id": str(confirm_request.order_id),
+            "payment_details": {
+                "tx_hash": tx_hash,
+                "amount_eth": payment_details.get("amount_eth"),
+                "block_number": payment_details.get("block_number"),
+                "num_allowances": num_allowances
+            },
+            "next_steps": "Your allowances are being retired and reward tokens are being distributed. Check order status for updates."
+        }
 
     except HTTPException:
         raise
@@ -175,6 +272,57 @@ async def get_order_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get order status: {str(e)}",
+        ) from e
+
+
+@router.get("/history", response_model=HistoryResponse)
+@limiter.limit("30/minute")
+async def get_retirement_history(
+    request: Request,
+    limit: int = 50,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get history of retired allowances"""
+    try:
+        # Get total count of retired allowances
+        count_stmt = select(Allowance).where(Allowance.status == "retired")
+        count_result = await session.execute(count_stmt)
+        total = len(count_result.scalars().all())
+
+        # Get retired allowances with pagination, ordered by most recent first
+        stmt = (
+            select(Allowance)
+            .where(Allowance.status == "retired")
+            .order_by(Allowance.updated_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        
+        result = await session.execute(stmt)
+        retired_allowances = result.scalars().all()
+
+        # Format response
+        history_items = []
+        for allowance in retired_allowances:
+            history_items.append({
+                "serial_number": allowance.serial_number,
+                "message": allowance.message,
+                "wallet": allowance.wallet,
+                "timestamp": allowance.timestamp.isoformat() if allowance.timestamp else allowance.updated_at.isoformat(),
+                "tx_hash": allowance.tx_hash,
+                "reward_tx_hash": allowance.reward_tx_hash,
+            })
+
+        return HistoryResponse(
+            retirements=history_items,
+            total=total
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get retirement history: {str(e)}",
         ) from e
 
 

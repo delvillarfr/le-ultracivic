@@ -72,6 +72,20 @@ class ThirdwebService:
                 else:
                     error_msg = f"Thirdweb API error: {response.status_code} - {response.text}"
                     logger.error(error_msg)
+                    
+                    # Send email alert for token transfer failure
+                    try:
+                        from app.services.email import email_service
+                        await email_service.send_token_transfer_failure_alert(
+                            order_id="unknown",
+                            wallet_address=to_address,
+                            num_allowances=amount // (10**18),  # Rough estimate
+                            error_details=error_msg,
+                            thirdweb_response=response.text
+                        )
+                    except Exception as email_error:
+                        logger.error(f"Failed to send email alert: {email_error}")
+                    
                     return {
                         "success": False,
                         "error": error_msg,
@@ -81,6 +95,20 @@ class ThirdwebService:
         except httpx.TimeoutException:
             error_msg = f"Timeout transferring tokens to {to_address}"
             logger.error(error_msg)
+            
+            # Send email alert for timeout
+            try:
+                from app.services.email import email_service
+                await email_service.send_token_transfer_failure_alert(
+                    order_id="unknown",
+                    wallet_address=to_address,
+                    num_allowances=amount // (10**18),  # Rough estimate
+                    error_details=error_msg,
+                    thirdweb_response={"error": "timeout"}
+                )
+            except Exception as email_error:
+                logger.error(f"Failed to send email alert: {email_error}")
+            
             return {
                 "success": False,
                 "error": error_msg
@@ -88,6 +116,20 @@ class ThirdwebService:
         except Exception as e:
             error_msg = f"Error transferring tokens to {to_address}: {str(e)}"
             logger.error(error_msg)
+            
+            # Send email alert for general errors
+            try:
+                from app.services.email import email_service
+                await email_service.send_token_transfer_failure_alert(
+                    order_id="unknown",
+                    wallet_address=to_address,
+                    num_allowances=amount // (10**18),  # Rough estimate
+                    error_details=error_msg,
+                    thirdweb_response={"error": str(e)}
+                )
+            except Exception as email_error:
+                logger.error(f"Failed to send email alert: {email_error}")
+            
             return {
                 "success": False,
                 "error": error_msg
