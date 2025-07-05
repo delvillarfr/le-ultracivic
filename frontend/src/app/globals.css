@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/WOFF2/AtkinsonHyperlegibleNext-Regular.woff2') format('woff2'),
+       url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/TTF/AtkinsonHyperlegibleNext-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/WOFF2/AtkinsonHyperlegibleNext-Bold.woff2') format('woff2'),
+       url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/TTF/AtkinsonHyperlegibleNext-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible Next';
+  src: url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/WOFF2/AtkinsonHyperlegibleNext-Medium.woff2') format('woff2'),
+       url('/fonts/Atkinson\ Hyperlegible\ Next/For\ Professional\ Use\ Only/Web\ Fonts/TTF/AtkinsonHyperlegibleNext-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+body {
+  font-family: 'Atkinson Hyperlegible Next', sans-serif;
+}
