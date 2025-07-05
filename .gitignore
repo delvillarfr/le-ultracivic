@@ -1,0 +1,32 @@
+*.env
+*.env.local
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/screenshots/
+frontend/visual-diff.js
+
+# Currency
+currency/node_modules/
+currency/artifacts/
+currency/cache/
+
+# Backend Python
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/*.log
+backend/audit.log
+backend/bandit-report.json
+backend/.mypy_cache/
+backend/.ruff_cache/
