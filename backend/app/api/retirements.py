@@ -15,6 +15,7 @@ from app.schemas.retirements import (
     RetirementRequest,
     RetirementResponse,
 )
+from app.services.blockchain import blockchain_service
 
 router = APIRouter(prefix="/retirements", tags=["retirements"])
 
@@ -75,7 +76,7 @@ async def confirm_payment(
 ):
     """Confirm payment was sent for an order"""
     try:
-        # Verify order exists
+        # Verify order exists and is in reserved status
         stmt = select(Allowance).where(Allowance.order_id == str(confirm_request.order_id))
         result = await session.execute(stmt)
         allowances = result.scalars().all()
@@ -85,14 +86,32 @@ async def confirm_payment(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
             )
 
-        # TODO: Add transaction hash to allowance model and store it
-        # For now, just return success
+        first_allowance = allowances[0]
+        if first_allowance.status != "reserved":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Order is not in reserved status: {first_allowance.status}"
+            )
 
-        return ConfirmPaymentResponse()
+        # Store transaction hash in database
+        for allowance in allowances:
+            allowance.tx_hash = confirm_request.tx_hash
+
+        await session.commit()
+
+        # Process payment confirmation in background
+        # For now, just store the tx_hash and return success
+        # The background task will verify payment and distribute tokens
+
+        return ConfirmPaymentResponse(
+            message="Payment confirmation received and is being processed",
+            status="processing"
+        )
 
     except HTTPException:
         raise
     except Exception as e:
+        await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to confirm payment: {str(e)}",
@@ -118,8 +137,14 @@ async def get_order_status(
         # Determine status based on allowance states
         first_allowance = allowances[0]
 
+        # Determine status based on allowance state and transaction hashes
         if first_allowance.status == "reserved":
-            status_value = OrderStatus.PENDING
+            if first_allowance.tx_hash and first_allowance.reward_tx_hash:
+                status_value = OrderStatus.PAID_BUT_NOT_RETIRED
+            elif first_allowance.tx_hash:
+                status_value = OrderStatus.PAID_BUT_NOT_RETIRED
+            else:
+                status_value = OrderStatus.PENDING
         elif first_allowance.status == "retired":
             status_value = OrderStatus.COMPLETED
         else:
@@ -136,6 +161,8 @@ async def get_order_status(
             status=status_value,
             serial_numbers=serial_numbers,
             message=first_allowance.message,
+            tx_hash=first_allowance.tx_hash,
+            reward_tx_hash=first_allowance.reward_tx_hash,
         )
 
     except HTTPException:
