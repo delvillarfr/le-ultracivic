@@ -4,6 +4,9 @@ interface MessageSectionProps {
 }
 
 export default function MessageSection({ messageValue, onMessageChange }: MessageSectionProps) {
+  const maxLength = 100;
+  const remaining = maxLength - messageValue.length;
+
   return (
     <section className="message-section">
       <div className="message-prompt">
@@ -15,7 +18,13 @@ export default function MessageSection({ messageValue, onMessageChange }: Messag
           value={messageValue}
           onChange={onMessageChange}
           placeholder='And they will say, "This land that was laid waste has become like the garden of Eden" Ezekiel 36:35'
+          maxLength={maxLength}
         />
+        {messageValue.length > 0 && (
+          <div className="character-counter">
+            {remaining} characters remaining
+          </div>
+        )}
       </div>
     </section>
   );

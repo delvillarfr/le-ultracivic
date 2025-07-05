@@ -16,6 +16,8 @@ export default function HeroSection({ allowanceValue, onAllowanceChange }: HeroS
           value={allowanceValue} 
           onChange={onAllowanceChange}
           className="allowance-input"
+          min="1"
+          max="99"
         />
         <img src="/media/hero2-2.svg" alt="Tons of CO2." className="hero2-2" />
       </div>

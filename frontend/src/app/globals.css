@@ -162,6 +162,18 @@ body {
     outline: none;
 }
 
+.character-counter {
+    position: absolute;
+    bottom: 5px;
+    right: 15px;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+    font-size: 10px;
+    color: #666;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
 .actions {
     display: flex;
     justify-content: center;
@@ -279,6 +291,65 @@ body {
 .contact-info {
     max-width: 500px;
     height: auto;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: 20px;
+    color: black;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+}
+
+.modal-content p {
+    margin-bottom: 15px;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+}
+
+.modal-content ul {
+    margin-bottom: 15px;
+    padding-left: 20px;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+}
+
+.modal-close-btn {
+    padding: 10px 20px;
+    background: #000;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+}
+
+.error-message {
+    text-align: center;
+    color: #d32f2f;
+    background: #ffebee;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-family: var(--font-atkinson), Arial, sans-serif;
+    font-size: 14px;
+    border: 1px solid #ffcdd2;
 }
 
 @media (max-width: 768px) {
