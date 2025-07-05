@@ -106,9 +106,33 @@ body {
     color: #dc3545;
 }
 
-.payment-pending, .payment-sent, .payment-confirming {
+.payment-pending, .payment-confirmed, .payment-confirming, .payment-processing {
     text-align: center;
     padding: 20px;
+}
+
+.etherscan-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.etherscan-link:hover {
+    text-decoration: underline;
+}
+
+.loading-message {
+    text-align: center;
+    color: #007bff;
+    margin: 10px 0;
+}
+
+.transaction-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.transaction-link:hover {
+    text-decoration: underline;
 }
 
 /* Background blur effect */

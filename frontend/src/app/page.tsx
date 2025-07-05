@@ -14,6 +14,7 @@ import WalletConnection from '@/components/WalletConnection';
 import PaymentModal from '@/components/PaymentModal';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useEthPrice } from '@/hooks/useEthPrice';
+import { useReservation } from '@/hooks/useReservation';
 
 export default function Home() {
   const [allowanceValue, setAllowanceValue] = useState(999);
@@ -27,6 +28,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState('');
   const { isReady, address } = useWalletConnection();
   const { ethPriceUSD, calculateEthAmount } = useEthPrice();
+  const { isReserving, reservationError, reservation, reserveAllowances, clearReservation } = useReservation();
 
   const updateCalculations = (allowance: number) => {
     const price = allowance * 24;
@@ -54,7 +56,7 @@ export default function Home() {
     setErrorMessage('');
   };
 
-  const handleDoItClick = () => {
+  const handleDoItClick = async () => {
     const allowance = allowanceValue;
     const message = messageValue.trim();
     
@@ -75,7 +77,18 @@ export default function Home() {
       return;
     }
     
-    setShowPaymentModal(true);
+    // Reserve allowances before showing payment modal
+    const reservationResult = await reserveAllowances({
+      num_allowances: allowance,
+      message: message,
+      wallet: address!
+    });
+    
+    if (reservationResult) {
+      setShowPaymentModal(true);
+    } else {
+      setErrorMessage(reservationError || 'Failed to reserve allowances');
+    }
   };
 
   const handleWhatClick = () => {
@@ -86,9 +99,21 @@ export default function Home() {
     setIsModalOpen(false);
   };
   
-  const handleWalletConnected = () => {
+  const handleWalletConnected = async () => {
     setShowWalletConnection(false);
-    setShowPaymentModal(true);
+    
+    // Reserve allowances after wallet connection
+    const reservationResult = await reserveAllowances({
+      num_allowances: allowanceValue,
+      message: messageValue.trim(),
+      wallet: address!
+    });
+    
+    if (reservationResult) {
+      setShowPaymentModal(true);
+    } else {
+      setErrorMessage(reservationError || 'Failed to reserve allowances');
+    }
   };
 
   useEffect(() => {
@@ -118,9 +143,14 @@ export default function Home() {
           messageValue={messageValue}
           onMessageChange={handleMessageChange}
         />
-        {errorMessage && (
+        {(errorMessage || reservationError) && (
           <div className="error-message">
-            {errorMessage}
+            {errorMessage || reservationError}
+          </div>
+        )}
+        {isReserving && (
+          <div className="loading-message">
+            Reserving allowances...
           </div>
         )}
         <Actions 
@@ -151,9 +181,13 @@ export default function Home() {
       
       <PaymentModal 
         isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={() => {
+          setShowPaymentModal(false);
+          clearReservation();
+        }}
         allowances={allowanceValue}
         message={messageValue}
+        reservation={reservation}
       />
     </>
   );
