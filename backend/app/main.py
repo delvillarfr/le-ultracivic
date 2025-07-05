@@ -1,19 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.api.retirements import router as retirements_router
 from app.config import settings
-from app.middleware.cors import setup_cors_middleware
-from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
-from app.middleware.validation import ValidationMiddleware
 from app.middleware.audit import AuditMiddleware, setup_audit_logging
+from app.middleware.cors import setup_cors_middleware
 from app.middleware.error_handling import (
     ErrorHandlingMiddleware,
     http_exception_handler,
     validation_exception_handler,
 )
+from app.middleware.rate_limit import limiter, rate_limit_exceeded_handler
+from app.middleware.validation import ValidationMiddleware
 
 app = FastAPI(
     title="Ultra Civic API",

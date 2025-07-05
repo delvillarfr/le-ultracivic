@@ -21,7 +21,7 @@ export default function ButtonSection() {
 
   return (
     <>
-      <div className="flex justify-center gap-8">
+      <div className="flex justify-center gap-12">
         <button
           onClick={handleDoIt}
           className="transition-transform hover:scale-105 active:scale-95"

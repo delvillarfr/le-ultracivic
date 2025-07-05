@@ -1,0 +1,13 @@
+repos:
+  # Simple syntax checking only
+  - repo: local
+    hooks:      
+      - id: python-check
+        name: python syntax check
+        entry: python -c "import ast, sys; [ast.parse(open(f).read()) for f in sys.argv[1:]]"
+        language: system
+        types: [python]
+
+# Configuration  
+default_stages: [commit]
+fail_fast: false

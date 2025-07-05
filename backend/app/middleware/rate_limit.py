@@ -1,8 +1,8 @@
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from fastapi import Request, Response
+from fastapi import Request
 from fastapi.responses import JSONResponse
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from app.config import settings
 
@@ -14,7 +14,7 @@ def rate_limit_key_func(request: Request):
 
 limiter = Limiter(
     key_func=rate_limit_key_func,
-    default_limits=[f"{settings.rate_limit_requests}/minute"]
+    default_limits=[f"{settings.rate_limit_requests}/minute"],
 )
 
 
@@ -24,8 +24,8 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
         status_code=429,
         content={
             "error": "Rate limit exceeded",
-            "detail": f"Too many requests. Limit: {settings.rate_limit_requests} per minute"
-        }
+            "detail": f"Too many requests. Limit: {settings.rate_limit_requests} per minute",
+        },
     )
     response.headers["Retry-After"] = str(exc.retry_after)
     return response

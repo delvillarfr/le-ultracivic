@@ -5,3 +5,4 @@ export { default as Hero2Right } from './Hero2Right';
 export { default as ValueProp1Left } from './ValueProp1Left';
 export { default as DoItButton } from './DoItButton';
 export { default as WhatButton } from './WhatButton';
+export { default as HistoryPrompt } from './HistoryPrompt';

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { HistoryPrompt } from './svg'
 
 export default function FormSection() {
   const [numAllowances, setNumAllowances] = useState<string>('')
@@ -39,49 +40,40 @@ export default function FormSection() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <label htmlFor="numAllowances" className="block text-sm font-medium text-gray-700 mb-2">
-          How many allowances?
-        </label>
-        <input
-          type="number"
-          id="numAllowances"
-          min="1"
-          max="99"
-          value={numAllowances}
-          onChange={handleNumAllowancesChange}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.numAllowances ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="Enter number (1-99)"
+    <div className="text-center space-y-2">
+      <HistoryPrompt className="mx-auto mb-2" />
+      
+      <div className="relative inline-block">
+        <img 
+          src="/media/history-prompt-box.svg" 
+          alt="Message Box"
+          className="w-full max-w-md mx-auto"
         />
-        {errors.numAllowances && (
-          <p className="text-red-500 text-sm mt-1">{errors.numAllowances}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-          Your Message to History:
-        </label>
         <textarea
           id="message"
           value={message}
           onChange={handleMessageChange}
           rows={4}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-            errors.message ? 'border-red-500' : 'border-gray-300'
-          }`}
+          className="absolute bg-transparent border-none outline-none resize-none text-center"
+          style={{ 
+            fontFamily: 'Atkinson Hyperlegible',
+            fontSize: '14px',
+            lineHeight: '1.2',
+            top: '20px',
+            left: '20px',
+            right: '20px',
+            bottom: '20px',
+            width: 'calc(100% - 40px)',
+            height: 'calc(100% - 40px)',
+            color: '#333'
+          }}
           placeholder="they will say, 'This land that was laid waste has become like the garden of Eden' Ezequiel 36:35"
         />
-        <div className="flex justify-between items-center mt-1">
-          <span className={`text-sm ${message.length > 100 ? 'text-red-500' : 'text-gray-500'}`}>
-            {message.length}/100 characters
-          </span>
-          {errors.message && (
-            <p className="text-red-500 text-sm">{errors.message}</p>
-          )}
+        {errors.message && (
+          <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+        )}
+        <div className="mt-1 text-xs text-gray-500">
+          {message.length}/100 characters
         </div>
       </div>
     </div>
