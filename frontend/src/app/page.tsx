@@ -16,13 +16,14 @@ import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useEthPrice } from '@/hooks/useEthPrice';
 import { useReservation } from '@/hooks/useReservation';
 import LoadingButton from '@/components/ui/LoadingButton';
+import CONFIG from '@/lib/config';
 
 export default function Home() {
-  const [allowanceValue, setAllowanceValue] = useState(999);
+  const [allowanceValue, setAllowanceValue] = useState(CONFIG.DEFAULT_ALLOWANCES);
   const [messageValue, setMessageValue] = useState('');
-  const [priceCalc, setPriceCalc] = useState(23976);
-  const [tokenCalc, setTokenCalc] = useState(999);
-  const [impactCalc, setImpactCalc] = useState(229770);
+  const [priceCalc, setPriceCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.PRICE_PER_ALLOWANCE_USD);
+  const [tokenCalc, setTokenCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.TOKENS_PER_ALLOWANCE);
+  const [impactCalc, setImpactCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.CO2_TONS_PER_ALLOWANCE);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showWalletConnection, setShowWalletConnection] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -32,9 +33,9 @@ export default function Home() {
   const { isReserving, reservationError, reservation, reserveAllowances, clearReservation } = useReservation();
 
   const updateCalculations = (allowance: number) => {
-    const price = allowance * 24;
-    const tokens = allowance;
-    const impact = allowance * 230;
+    const price = allowance * CONFIG.PRICE_PER_ALLOWANCE_USD;
+    const tokens = allowance * CONFIG.TOKENS_PER_ALLOWANCE;
+    const impact = allowance * CONFIG.CO2_TONS_PER_ALLOWANCE;
     
     setPriceCalc(price);
     setTokenCalc(tokens);
@@ -44,8 +45,8 @@ export default function Home() {
   const handleAllowanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = parseInt(e.target.value) || 0;
     
-    if (value < 1) value = 1;
-    if (value > 99) value = 99;
+    if (value < CONFIG.MIN_ALLOWANCES) value = CONFIG.MIN_ALLOWANCES;
+    if (value > CONFIG.MAX_ALLOWANCES) value = CONFIG.MAX_ALLOWANCES;
     
     setAllowanceValue(value);
     updateCalculations(value);
@@ -61,8 +62,8 @@ export default function Home() {
     const allowance = allowanceValue;
     const message = messageValue.trim();
     
-    if (allowance < 1 || allowance > 99) {
-      setErrorMessage('Please enter a valid allowance amount (1-99).');
+    if (allowance < CONFIG.MIN_ALLOWANCES || allowance > CONFIG.MAX_ALLOWANCES) {
+      setErrorMessage(`Please enter a valid allowance amount (${CONFIG.MIN_ALLOWANCES}-${CONFIG.MAX_ALLOWANCES}).`);
       return;
     }
     

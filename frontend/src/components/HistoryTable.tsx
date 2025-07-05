@@ -57,14 +57,29 @@ export default function HistoryTable() {
               </div>
               <div className="row-col">
                 <span className="transaction">
-                  <a 
-                    href={`https://sepolia.etherscan.io/address/${retirement.wallet}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transaction-link"
-                  >
-                    {retirement.wallet.slice(0, 10)}...{retirement.wallet.slice(-8)}
-                  </a>
+                  {retirement.reward_tx_hash ? (
+                    <a 
+                      href={`https://sepolia.etherscan.io/tx/${retirement.reward_tx_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transaction-link"
+                      title="View PR token reward transaction"
+                    >
+                      {retirement.reward_tx_hash.slice(0, 10)}...{retirement.reward_tx_hash.slice(-8)}
+                    </a>
+                  ) : retirement.tx_hash ? (
+                    <a 
+                      href={`https://sepolia.etherscan.io/tx/${retirement.tx_hash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transaction-link"
+                      title="View payment transaction"
+                    >
+                      {retirement.tx_hash.slice(0, 10)}...{retirement.tx_hash.slice(-8)}
+                    </a>
+                  ) : (
+                    <span className="no-transaction">Processing...</span>
+                  )}
                 </span>
               </div>
             </div>

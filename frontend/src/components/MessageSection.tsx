@@ -1,10 +1,12 @@
+import CONFIG from '@/lib/config';
+
 interface MessageSectionProps {
   messageValue: string;
   onMessageChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
 export default function MessageSection({ messageValue, onMessageChange }: MessageSectionProps) {
-  const maxLength = 100;
+  const maxLength = CONFIG.MAX_MESSAGE_LENGTH;
   const remaining = maxLength - messageValue.length;
 
   return (

@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { usePayment } from '@/hooks/usePayment'
 import { useEthPrice } from '@/hooks/useEthPrice'
+import { useHistory } from '@/hooks/useHistory'
 import { api, ReserveResponse, StatusResponse, pollOrderStatus } from '@/lib/api'
+import CONFIG from '@/lib/config'
 import ProgressSteps from './ui/ProgressSteps'
 import LoadingButton from './ui/LoadingButton'
 import LoadingSpinner from './ui/LoadingSpinner'
@@ -19,6 +21,7 @@ interface PaymentModalProps {
 export default function PaymentModal({ isOpen, onClose, allowances, message, reservation }: PaymentModalProps) {
   const { initiatePayment, hash, isTransactionPending, isConfirming, isConfirmed, transactionError, calculateEthAmount } = usePayment()
   const { ethPriceUSD } = useEthPrice()
+  const { refreshHistory } = useHistory()
   const [orderStatus, setOrderStatus] = useState<StatusResponse | null>(null)
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
@@ -27,7 +30,7 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
   if (!isOpen) return null
 
   const ethAmount = calculateEthAmount(allowances)
-  const usdAmount = allowances * 24
+  const usdAmount = allowances * CONFIG.PRICE_PER_ALLOWANCE_USD
 
   const handlePayment = async () => {
     if (!reservation) {
@@ -69,6 +72,10 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
         (finalStatus) => {
           setOrderStatus(finalStatus)
           setIsPolling(false)
+          // Refresh history when payment completes successfully
+          if (finalStatus.status === 'completed') {
+            refreshHistory()
+          }
         },
         (error) => {
           setConfirmError(error.message)
@@ -200,7 +207,22 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
             <div className="success-icon">✓</div>
             <h3>Payment Successful!</h3>
             <p>Your {allowances} CO₂ allowances have been retired.</p>
-            <p className="hash-display">Transaction: {hash}</p>
+            <p>You've received {allowances * CONFIG.TOKENS_PER_ALLOWANCE} $PR tokens as proof of your environmental impact!</p>
+            <p className="hash-display">Payment Transaction: {hash}</p>
+            {orderStatus?.reward_tx_hash && (
+              <p className="hash-display">
+                PR Token Reward: 
+                <a 
+                  href={`https://sepolia.etherscan.io/tx/${orderStatus.reward_tx_hash}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="etherscan-link"
+                  style={{ marginLeft: '8px' }}
+                >
+                  {orderStatus.reward_tx_hash.slice(0, 10)}...{orderStatus.reward_tx_hash.slice(-8)}
+                </a>
+              </p>
+            )}
             {orderStatus?.serial_numbers && (
               <div className="serial-numbers">
                 <p><strong>Serial Numbers:</strong></p>
@@ -214,7 +236,7 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
                 rel="noopener noreferrer"
                 className="etherscan-link"
               >
-                View on Etherscan
+                View Payment on Etherscan
               </a>
             </p>
             <LoadingButton onClick={onClose} variant="primary">

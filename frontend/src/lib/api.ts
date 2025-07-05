@@ -34,7 +34,10 @@ export interface HistoryResponse {
     message: string;
     wallet: string;
     timestamp: string;
+    tx_hash?: string;
+    reward_tx_hash?: string;
   }>;
+  total: number;
 }
 
 class ApiError extends Error {

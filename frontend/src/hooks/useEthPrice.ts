@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import CONFIG from '@/lib/config'
 
 export function useEthPrice() {
   const [ethPriceUSD, setEthPriceUSD] = useState<number | null>(null)
@@ -31,7 +32,7 @@ export function useEthPrice() {
 
   const calculateEthAmount = (allowances: number) => {
     if (!ethPriceUSD) return null
-    const usdAmount = allowances * 24
+    const usdAmount = allowances * CONFIG.PRICE_PER_ALLOWANCE_USD
     return usdAmount / ethPriceUSD
   }
 
