@@ -73,6 +73,7 @@ async def create_retirement(
 async def confirm_payment(
     request: Request,
     confirm_request: ConfirmPaymentRequest,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
 ):
     """Confirm payment was sent for an order"""
@@ -100,9 +101,11 @@ async def confirm_payment(
 
         await session.commit()
 
-        # Process payment confirmation in background
-        # For now, just store the tx_hash and return success
-        # The background task will verify payment and distribute tokens
+        # Trigger background payment processing
+        background_tasks.add_task(
+            background_manager.process_payment_background,
+            str(confirm_request.order_id)
+        )
 
         return ConfirmPaymentResponse(
             message="Payment confirmation received and is being processed",
@@ -172,4 +175,44 @@ async def get_order_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get order status: {str(e)}",
+        ) from e
+
+
+# Admin endpoints for background task management
+@router.get("/admin/background-status")
+async def get_background_status(request: Request):
+    """Get background task status (admin endpoint)."""
+    try:
+        status_info = await background_manager.get_status()
+        return status_info
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get background status: {str(e)}",
+        ) from e
+
+
+@router.post("/admin/cleanup-now")
+async def trigger_cleanup_now(request: Request):
+    """Manually trigger cleanup job (admin endpoint)."""
+    try:
+        result = await background_manager.run_cleanup_now()
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to trigger cleanup: {str(e)}",
+        ) from e
+
+
+@router.post("/admin/check-transactions-now")
+async def trigger_transaction_check_now(request: Request):
+    """Manually trigger transaction monitoring (admin endpoint)."""
+    try:
+        result = await background_manager.run_transaction_check_now()
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to trigger transaction check: {str(e)}",
         ) from e
