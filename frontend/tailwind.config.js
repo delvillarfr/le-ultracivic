@@ -8,7 +8,15 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        'atkinson': ['Atkinson Hyperlegible Next', 'sans-serif'],
+        'atkinson': ['Atkinson Hyperlegible Next', 'system-ui', 'sans-serif'],
+        'sans': ['Atkinson Hyperlegible Next', 'system-ui', 'sans-serif'],
+      },
+      fontWeight: {
+        'normal': '400',
+        'medium': '500',
+        'semibold': '600',
+        'bold': '700',
+        'extrabold': '800',
       },
     },
   },
