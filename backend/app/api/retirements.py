@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
@@ -15,6 +15,7 @@ from app.schemas.retirements import (
     RetirementRequest,
     RetirementResponse,
 )
+from app.services.background_manager import background_manager
 from app.services.blockchain import blockchain_service
 
 router = APIRouter(prefix="/retirements", tags=["retirements"])
