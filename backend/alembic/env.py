@@ -7,6 +7,10 @@ from sqlmodel import SQLModel
 from alembic import context
 from app.models import *
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 config = context.config
 
 if config.config_file_name is not None:
@@ -18,6 +22,12 @@ target_metadata = SQLModel.metadata
 def get_url():
     url = os.getenv("DATABASE_URL")
     if url:
+        # Convert asyncpg URL to psycopg2 for alembic
+        if url.startswith("postgresql+asyncpg://"):
+            url = url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+        # Fix SSL parameter for psycopg2
+        if "?ssl=require" in url:
+            url = url.replace("?ssl=require", "?sslmode=require")
         return url
     return config.get_main_option("sqlalchemy.url")
 
