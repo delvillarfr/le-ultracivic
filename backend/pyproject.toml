@@ -7,11 +7,12 @@ readme = "README.md"
 packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 fastapi = "^0.104.1"
 uvicorn = {extras = ["standard"], version = "^0.24.0"}
 sqlmodel = "^0.0.14"
 asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.7"
 alembic = "^1.12.1"
 pydantic-settings = "^2.1.0"
 python-dotenv = "^1.0.0"
@@ -31,7 +32,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py39"
 line-length = 88
 select = [
     "E",  # pycodestyle errors
@@ -53,7 +54,7 @@ ignore = [
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py39']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
