@@ -10,6 +10,8 @@ import Actions from '@/components/Actions';
 import HistoryTable from '@/components/HistoryTable';
 import Footer from '@/components/Footer';
 import Modal from '@/components/Modal';
+import WalletConnection from '@/components/WalletConnection';
+import { useWalletConnection } from '@/hooks/useWalletConnection';
 
 export default function Home() {
   const [allowanceValue, setAllowanceValue] = useState(999);
@@ -18,7 +20,9 @@ export default function Home() {
   const [tokenCalc, setTokenCalc] = useState(999);
   const [impactCalc, setImpactCalc] = useState(229770);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showWalletConnection, setShowWalletConnection] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { isReady, address } = useWalletConnection();
 
   const updateCalculations = (allowance: number) => {
     const price = allowance * 24;
@@ -61,12 +65,17 @@ export default function Home() {
     }
     
     setErrorMessage('');
-    alert(`Starting payment flow for ${allowance} tons of CO2 allowances.\nMessage: "${message}"`);
+    
+    if (!isReady) {
+      setShowWalletConnection(true);
+      return;
+    }
     
     console.log('Payment flow initiated:', {
       allowance: allowance,
       price: allowance * 24,
-      message: message
+      message: message,
+      wallet: address
     });
   };
 
@@ -76,6 +85,11 @@ export default function Home() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+  
+  const handleWalletConnected = () => {
+    setShowWalletConnection(false);
+    handleDoItClick();
   };
 
   useEffect(() => {
@@ -127,6 +141,12 @@ export default function Home() {
           <li>Leave a message for history about your contribution</li>
         </ul>
         <p>Each ton of CO2 allowances you retire makes a real difference in fighting climate change.</p>
+      </Modal>
+      
+      <Modal isOpen={showWalletConnection} onClose={() => setShowWalletConnection(false)}>
+        <h2>Connect Your Wallet</h2>
+        <p>Connect your wallet to proceed with the payment.</p>
+        <WalletConnection onConnected={handleWalletConnected} />
       </Modal>
     </>
   );

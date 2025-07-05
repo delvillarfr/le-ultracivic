@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { atkinsonFont } from "./fonts";
 import "./globals.css";
+import { Web3Provider } from "@/components/providers/Web3Provider";
+import '@rainbow-me/rainbowkit/styles.css';
 
 export const metadata: Metadata = {
   title: "Ultra Civic",
@@ -15,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={atkinsonFont.variable}>
-        {children}
+        <Web3Provider>
+          {children}
+        </Web3Provider>
       </body>
     </html>
   );

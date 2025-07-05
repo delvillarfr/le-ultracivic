@@ -26,6 +26,17 @@ body {
     padding: 20px 0;
 }
 
+.wallet-connection {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.wrong-network {
+    color: #ff0000;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
 .container {
     max-width: 800px;
     margin: 0 auto;
