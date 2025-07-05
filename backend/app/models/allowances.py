@@ -20,5 +20,7 @@ class Allowance(SQLModel, table=True):
     timestamp: Optional[datetime] = Field(default=None, index=True)
     wallet: Optional[str] = Field(default=None, max_length=42)
     message: Optional[str] = Field(default=None, max_length=100)
+    tx_hash: Optional[str] = Field(default=None, max_length=66)
+    reward_tx_hash: Optional[str] = Field(default=None, max_length=66)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

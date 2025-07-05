@@ -50,7 +50,7 @@ async def create_retirement(
 
         for allowance in allowances:
             allowance.status = "reserved"
-            allowance.order = str(order_id)
+            allowance.order_id = str(order_id)
             allowance.wallet = retirement_request.wallet
             allowance.message = retirement_request.message
 
@@ -76,7 +76,7 @@ async def confirm_payment(
     """Confirm payment was sent for an order"""
     try:
         # Verify order exists
-        stmt = select(Allowance).where(Allowance.order == str(confirm_request.order_id))
+        stmt = select(Allowance).where(Allowance.order_id == str(confirm_request.order_id))
         result = await session.execute(stmt)
         allowances = result.scalars().all()
 
@@ -106,7 +106,7 @@ async def get_order_status(
 ):
     """Get the status of an order"""
     try:
-        stmt = select(Allowance).where(Allowance.order == str(order_id))
+        stmt = select(Allowance).where(Allowance.order_id == str(order_id))
         result = await session.execute(stmt)
         allowances = result.scalars().all()
 
