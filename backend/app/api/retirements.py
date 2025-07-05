@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
@@ -23,6 +24,7 @@ from app.services.price_service import price_service
 from app.services.reward_calculator import reward_calculator
 
 router = APIRouter(prefix="/retirements", tags=["retirements"])
+logger = logging.getLogger(__name__)
 
 
 @router.get("/estimate/{num_allowances}")
@@ -128,13 +130,23 @@ async def confirm_payment(
     session: AsyncSession = Depends(get_session),
 ):
     """Confirm payment was sent for an order with enhanced validation"""
+    order_id = str(confirm_request.order_id)
+    tx_hash = confirm_request.tx_hash
+    
+    logger.info(
+        f"CRITICAL: Payment confirmation received | "
+        f"order_id={order_id} | tx_hash={tx_hash} | "
+        f"client_ip={request.client.host if request.client else 'unknown'}"
+    )
+    
     try:
         # Verify order exists and is in reserved status
-        stmt = select(Allowance).where(Allowance.order_id == str(confirm_request.order_id))
+        stmt = select(Allowance).where(Allowance.order_id == order_id)
         result = await session.execute(stmt)
         allowances = result.scalars().all()
 
         if not allowances:
+            logger.error(f"CRITICAL: Order not found | order_id={order_id}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
             )
@@ -157,12 +169,23 @@ async def confirm_payment(
         tx_hash = confirm_request.tx_hash
 
         # Enhanced payment validation
+        logger.info(
+            f"CRITICAL: Starting payment validation | "
+            f"order_id={order_id} | tx_hash={tx_hash} | "
+            f"num_allowances={num_allowances} | wallet={first_allowance.wallet}"
+        )
+        
         validation_result = await payment_validator.validate_payment_transaction(
             tx_hash=tx_hash,
             num_allowances=num_allowances
         )
 
         if not validation_result["success"]:
+            logger.error(
+                f"CRITICAL: Payment validation failed | "
+                f"order_id={order_id} | tx_hash={tx_hash} | "
+                f"error={validation_result.get('error')}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Payment validation failed: {validation_result.get('error')}",
@@ -186,11 +209,18 @@ async def confirm_payment(
             allowance.tx_hash = confirm_request.tx_hash
 
         await session.commit()
+        
+        logger.info(
+            f"CRITICAL: Payment confirmed and stored | "
+            f"order_id={order_id} | tx_hash={tx_hash} | "
+            f"wallet={first_allowance.wallet} | num_allowances={num_allowances} | "
+            f"triggering_background_processing=True"
+        )
 
         # Trigger background payment processing
         background_tasks.add_task(
             background_manager.process_payment_background,
-            str(confirm_request.order_id)
+            order_id
         )
 
         # Get payment details for response
@@ -283,40 +313,69 @@ async def get_retirement_history(
     offset: int = 0,
     session: AsyncSession = Depends(get_session),
 ):
-    """Get history of retired allowances"""
+    """Get history of retired allowances grouped by retirement orders"""
     try:
-        # Get total count of retired allowances
-        count_stmt = select(Allowance).where(Allowance.status == "retired")
-        count_result = await session.execute(count_stmt)
-        total = len(count_result.scalars().all())
-
-        # Get retired allowances with pagination, ordered by most recent first
+        # Get all retired allowances grouped by order_id
         stmt = (
             select(Allowance)
-            .where(Allowance.status == "retired")
+            .where(Allowance.status == "retired", Allowance.order_id.is_not(None))
             .order_by(Allowance.updated_at.desc())
-            .limit(limit)
-            .offset(offset)
         )
         
         result = await session.execute(stmt)
-        retired_allowances = result.scalars().all()
+        all_retired_allowances = result.scalars().all()
+        
+        # Group allowances by order_id
+        orders_dict = {}
+        for allowance in all_retired_allowances:
+            order_id = allowance.order_id
+            if order_id not in orders_dict:
+                orders_dict[order_id] = {
+                    "allowances": [],
+                    "timestamp": allowance.updated_at,
+                    "message": allowance.message,
+                    "wallet": allowance.wallet,
+                    "reward_tx_hash": allowance.reward_tx_hash
+                }
+            orders_dict[order_id]["allowances"].append(allowance)
+            
+            # Use the most recent timestamp for the order
+            if allowance.updated_at > orders_dict[order_id]["timestamp"]:
+                orders_dict[order_id]["timestamp"] = allowance.updated_at
 
-        # Format response
+        # Sort orders by timestamp (most recent first) and apply pagination
+        sorted_orders = sorted(
+            orders_dict.items(), 
+            key=lambda x: x[1]["timestamp"], 
+            reverse=True
+        )
+        
+        total_orders = len(sorted_orders)
+        paginated_orders = sorted_orders[offset:offset + limit]
+
+        # Build history items
         history_items = []
-        for allowance in retired_allowances:
+        for order_id, order_data in paginated_orders:
+            # Generate Etherscan link for reward transaction
+            etherscan_link = None
+            if order_data["reward_tx_hash"]:
+                etherscan_link = f"https://sepolia.etherscan.io/tx/{order_data['reward_tx_hash']}"
+            
+            # Collect all serial numbers for this order
+            serial_numbers = [allowance.serial_number for allowance in order_data["allowances"]]
+            
             history_items.append({
-                "serial_number": allowance.serial_number,
-                "message": allowance.message,
-                "wallet": allowance.wallet,
-                "timestamp": allowance.timestamp.isoformat() if allowance.timestamp else allowance.updated_at.isoformat(),
-                "tx_hash": allowance.tx_hash,
-                "reward_tx_hash": allowance.reward_tx_hash,
+                "serial_numbers": serial_numbers,
+                "message": order_data["message"],
+                "wallet": order_data["wallet"],
+                "timestamp": order_data["timestamp"].isoformat(),
+                "etherscan_link": etherscan_link,
+                "order_id": order_id
             })
 
         return HistoryResponse(
             retirements=history_items,
-            total=total
+            total=total_orders
         )
 
     except Exception as e:

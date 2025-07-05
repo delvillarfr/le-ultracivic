@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from slowapi.errors import RateLimitExceeded
 
 from app.api.retirements import router as retirements_router
+from app.api.health import router as health_router
 from app.config import settings
 from app.services.background_manager import background_manager
 from app.middleware.audit import AuditMiddleware, setup_audit_logging
@@ -57,8 +58,9 @@ app.add_exception_handler(ValidationError, validation_exception_handler)
 
 # Include routers
 app.include_router(retirements_router, prefix="/api")
+app.include_router(health_router)
 
 
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "message": "Ultra Civic API is running"}
+@app.get("/")
+async def root():
+    return {"message": "Ultra Civic API", "status": "running", "version": "1.0.0"}

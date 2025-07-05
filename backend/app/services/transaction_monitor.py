@@ -116,7 +116,11 @@ class TransactionMonitorService:
                 return
             
             # Distribute reward tokens
-            logger.info(f"Distributing {num_allowances} tokens to {wallet_address} for order {order_id}")
+            logger.info(
+                f"CRITICAL: Starting token distribution | "
+                f"order_id={order_id} | wallet={wallet_address} | "
+                f"tokens={num_allowances} | serial_numbers={[a.serial_number for a in allowances]}"
+            )
             
             token_result = await thirdweb_service.transfer_tokens(
                 to_address=wallet_address,
@@ -182,7 +186,12 @@ class TransactionMonitorService:
             
             await session.commit()
             
-            logger.info(f"Order {order_id} completed successfully. Allowances retired, tokens distributed.")
+            logger.info(
+                f"CRITICAL: Order completed successfully | "
+                f"order_id={order_id} | wallet={wallet_address} | "
+                f"tokens={num_allowances} | reward_tx={reward_tx_hash} | "
+                f"retired_allowances={[a.serial_number for a in allowances]}"
+            )
             
         except Exception as e:
             logger.error(f"Error processing confirmed payment for order {order_id}: {str(e)}")

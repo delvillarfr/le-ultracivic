@@ -6,6 +6,7 @@ from typing import Dict, Optional
 import httpx
 
 from app.config import settings
+from app.utils.retry import retry_external_api, thirdweb_circuit_breaker
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class ThirdwebService:
             "Content-Type": "application/json"
         }
 
+    @retry_external_api(max_retries=2, delay=2.0, context="thirdweb_token_transfer")
     async def transfer_tokens(
         self,
         to_address: str,
@@ -33,7 +35,7 @@ class ThirdwebService:
         from_address: Optional[str] = None
     ) -> Dict[str, any]:
         """
-        Transfer ERC-20 tokens using Thirdweb Engine.
+        Transfer ERC-20 tokens using Thirdweb Engine with retries.
         
         Args:
             to_address: Recipient wallet address
@@ -43,6 +45,11 @@ class ThirdwebService:
         Returns:
             Dict with transfer result and transaction hash
         """
+        # Check circuit breaker
+        if not thirdweb_circuit_breaker.can_execute():
+            logger.error(f"Thirdweb circuit breaker is open, cannot transfer {amount} tokens to {to_address}")
+            raise Exception("Thirdweb service unavailable (circuit breaker open)")
+        
         if from_address is None:
             from_address = settings.treasury_wallet_address
         
@@ -52,6 +59,8 @@ class ThirdwebService:
             "toAddress": to_address,
             "amount": str(amount)
         }
+        
+        logger.info(f"Transferring {amount} tokens to {to_address} via Thirdweb")
         
         try:
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -63,13 +72,19 @@ class ThirdwebService:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    return {
+                    thirdweb_circuit_breaker.record_success()
+                    
+                    result = {
                         "success": True,
                         "transaction_hash": data.get("result", {}).get("transactionHash"),
                         "queue_id": data.get("result", {}).get("queueId"),
                         "data": data
                     }
+                    
+                    logger.info(f"Token transfer initiated successfully: queue_id={result.get('queue_id')}")
+                    return result
                 else:
+                    thirdweb_circuit_breaker.record_failure()
                     error_msg = f"Thirdweb API error: {response.status_code} - {response.text}"
                     logger.error(error_msg)
                     

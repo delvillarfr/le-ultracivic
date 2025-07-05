@@ -7,6 +7,7 @@ from typing import Dict, Optional
 import httpx
 
 from app.config import settings
+from app.utils.retry import retry_external_api, alchemy_circuit_breaker
 
 logger = logging.getLogger(__name__)
 
@@ -18,9 +19,10 @@ class AlchemyService:
         self.api_url = settings.alchemy_sepolia_url
         self.timeout = httpx.Timeout(30.0)
 
+    @retry_external_api(max_retries=3, delay=1.0, context="alchemy_transaction_receipt")
     async def get_transaction_receipt(self, tx_hash: str) -> Optional[Dict]:
         """
-        Get transaction receipt from Alchemy.
+        Get transaction receipt from Alchemy with retries and circuit breaker.
         
         Args:
             tx_hash: Transaction hash to check
@@ -28,6 +30,11 @@ class AlchemyService:
         Returns:
             Transaction receipt dict or None if not found/pending
         """
+        # Check circuit breaker
+        if not alchemy_circuit_breaker.can_execute():
+            logger.warning(f"Alchemy circuit breaker is open, skipping transaction receipt check for {tx_hash}")
+            raise Exception("Alchemy service unavailable (circuit breaker open)")
+        
         payload = {
             "jsonrpc": "2.0",
             "id": 1,
@@ -40,6 +47,8 @@ class AlchemyService:
         }
         
         try:
+            logger.debug(f"Fetching transaction receipt for {tx_hash}")
+            
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     self.api_url,
@@ -48,23 +57,40 @@ class AlchemyService:
                 )
                 
                 if response.status_code != 200:
-                    logger.error(f"Alchemy API error: {response.status_code} - {response.text}")
-                    return None
+                    alchemy_circuit_breaker.record_failure()
+                    error_msg = f"Alchemy API error: {response.status_code} - {response.text}"
+                    logger.error(error_msg)
+                    raise Exception(error_msg)
                 
                 data = response.json()
                 
                 if "error" in data:
-                    logger.error(f"Alchemy RPC error: {data['error']}")
-                    return None
+                    alchemy_circuit_breaker.record_failure()
+                    error_msg = f"Alchemy RPC error: {data['error']}"
+                    logger.error(error_msg)
+                    raise Exception(error_msg)
                 
-                return data.get("result")
+                # Success - record for circuit breaker
+                alchemy_circuit_breaker.record_success()
+                result = data.get("result")
                 
-        except httpx.TimeoutException:
-            logger.error(f"Timeout getting transaction receipt for {tx_hash}")
-            return None
+                if result:
+                    logger.debug(f"Transaction receipt retrieved for {tx_hash}")
+                else:
+                    logger.debug(f"Transaction {tx_hash} still pending")
+                    
+                return result
+                
+        except httpx.TimeoutException as e:
+            alchemy_circuit_breaker.record_failure()
+            error_msg = f"Timeout getting transaction receipt for {tx_hash}: {str(e)}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
         except Exception as e:
-            logger.error(f"Error getting transaction receipt for {tx_hash}: {str(e)}")
-            return None
+            alchemy_circuit_breaker.record_failure()
+            error_msg = f"Error getting transaction receipt for {tx_hash}: {str(e)}"
+            logger.error(error_msg)
+            raise
 
     async def is_transaction_confirmed(self, tx_hash: str) -> Optional[bool]:
         """
