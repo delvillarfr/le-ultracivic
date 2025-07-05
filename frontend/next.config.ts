@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
       config.resolve.fallback = {
         ...config.resolve.fallback,
         'pino-pretty': false,
+        'idb-keyval': false,
+        'indexeddb': false,
       };
     }
     
@@ -41,7 +43,14 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  serverExternalPackages: ['@walletconnect/logger'],
+  serverExternalPackages: [
+    '@walletconnect/logger',
+    '@walletconnect/sign-client',
+    '@walletconnect/core', 
+    '@walletconnect/universal-provider',
+    'idb-keyval',
+    'valtio'
+  ],
 };
 
 export default nextConfig;
