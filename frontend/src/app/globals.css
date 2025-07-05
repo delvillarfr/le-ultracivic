@@ -135,6 +135,309 @@ body {
     text-decoration: underline;
 }
 
+/* Loading Spinner Styles */
+.loading-spinner {
+    display: inline-block;
+    position: relative;
+}
+
+.spinner-ring {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 2px solid transparent;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Progress Steps Styles */
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 0 20px;
+}
+
+.step-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.step-indicator {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.step-pending .step-indicator {
+    background-color: #e9ecef;
+    border: 2px solid #dee2e6;
+    color: #6c757d;
+}
+
+.step-active .step-indicator {
+    background-color: #007bff;
+    border: 2px solid #007bff;
+    color: white;
+}
+
+.step-completed .step-indicator {
+    background-color: #28a745;
+    border: 2px solid #28a745;
+    color: white;
+}
+
+.step-error .step-indicator {
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
+    color: white;
+}
+
+.step-checkmark, .step-error {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.step-label {
+    font-size: 12px;
+    color: #6c757d;
+    max-width: 80px;
+}
+
+.step-active .step-label {
+    color: #007bff;
+    font-weight: 500;
+}
+
+.step-completed .step-label {
+    color: #28a745;
+}
+
+.step-error .step-label {
+    color: #dc3545;
+}
+
+.step-connector {
+    height: 2px;
+    background-color: #dee2e6;
+    flex: 1;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+}
+
+.connector-completed {
+    background-color: #28a745;
+}
+
+/* Loading Button Styles */
+.loading-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 48px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover:not(.btn-disabled):not(.btn-loading) {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover:not(.btn-disabled):not(.btn-loading) {
+    background-color: #545b62;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover:not(.btn-disabled):not(.btn-loading) {
+    background-color: #c82333;
+}
+
+.btn-loading {
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-spinner {
+    margin-right: 8px;
+}
+
+.btn-text-hidden {
+    visibility: hidden;
+}
+
+/* Enhanced Animation Effects */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+.bounce {
+    animation: bounce 1s ease-in-out;
+}
+
+/* Enhanced Payment Modal Styles */
+.connecting-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+.network-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 5px;
+}
+
+.hash-display {
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+    background-color: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.success-icon, .error-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.success-icon {
+    color: #28a745;
+}
+
+.error-icon {
+    color: #dc3545;
+}
+
+.serial-numbers {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.serial-list {
+    font-family: monospace;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+/* Enhanced button styles for payment modal */
+.confirm-payment-btn {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.cancel-btn {
+    margin-top: 10px;
+}
+
+/* Enhanced action buttons */
+.do-it-btn, .what-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: auto !important;
+}
+
+.do-it-btn:hover, .what-btn:hover {
+    background: transparent !important;
+    transform: scale(1.05);
+}
+
+.do-it-btn img, .what-btn img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* Enhanced container blur */
+.container.blurred {
+    filter: blur(5px);
+    transition: filter 0.3s ease;
+}
+
+.container:not(.blurred) {
+    filter: blur(0px);
+    transition: filter 0.3s ease;
+}
+
 /* Background blur effect */
 .container.blurred {
     filter: blur(5px);

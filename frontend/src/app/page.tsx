@@ -15,6 +15,7 @@ import PaymentModal from '@/components/PaymentModal';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useEthPrice } from '@/hooks/useEthPrice';
 import { useReservation } from '@/hooks/useReservation';
+import LoadingButton from '@/components/ui/LoadingButton';
 
 export default function Home() {
   const [allowanceValue, setAllowanceValue] = useState(999);
@@ -153,10 +154,23 @@ export default function Home() {
             Reserving allowances...
           </div>
         )}
-        <Actions 
-          onDoItClick={handleDoItClick}
-          onWhatClick={handleWhatClick}
-        />
+        <div className="actions">
+          <LoadingButton 
+            onClick={handleDoItClick}
+            isLoading={isReserving}
+            className="action-btn do-it-btn"
+            variant="primary"
+          >
+            <img src="/media/doit.svg" alt="Do It" className="doit" />
+          </LoadingButton>
+          <LoadingButton 
+            onClick={handleWhatClick}
+            className="action-btn what-btn"
+            variant="secondary"
+          >
+            <img src="/media/what.svg" alt="What?" className="what" />
+          </LoadingButton>
+        </div>
         <HistoryTable />
         <Footer />
       </div>
@@ -176,7 +190,10 @@ export default function Home() {
       <Modal isOpen={showWalletConnection} onClose={() => setShowWalletConnection(false)}>
         <h2>Connect Your Wallet</h2>
         <p>Connect your wallet to proceed with the payment.</p>
-        <WalletConnection onConnected={handleWalletConnected} />
+        <WalletConnection 
+          onConnected={handleWalletConnected} 
+          isConnecting={isReserving}
+        />
       </Modal>
       
       <PaymentModal 

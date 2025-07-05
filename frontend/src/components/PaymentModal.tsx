@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { usePayment } from '@/hooks/usePayment'
 import { useEthPrice } from '@/hooks/useEthPrice'
 import { api, ReserveResponse, StatusResponse, pollOrderStatus } from '@/lib/api'
+import ProgressSteps from './ui/ProgressSteps'
+import LoadingButton from './ui/LoadingButton'
+import LoadingSpinner from './ui/LoadingSpinner'
 
 interface PaymentModalProps {
   isOpen: boolean
@@ -89,13 +92,48 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
     if (isTransactionPending) return 'pending'
     return 'ready'
   }
+  
+  const getProgressSteps = () => {
+    const state = getPaymentState()
+    return [
+      {
+        id: 'reserve',
+        label: 'Reserved',
+        status: reservation ? 'completed' : 'pending'
+      },
+      {
+        id: 'payment',
+        label: 'Payment',
+        status: state === 'ready' ? 'pending' : 
+                state === 'pending' || state === 'confirming' ? 'active' :
+                ['confirmed', 'confirming_payment', 'processing', 'success'].includes(state) ? 'completed' :
+                state === 'error' ? 'error' : 'pending'
+      },
+      {
+        id: 'confirm',
+        label: 'Confirming',
+        status: state === 'confirming_payment' ? 'active' :
+                ['processing', 'success'].includes(state) ? 'completed' :
+                state === 'error' ? 'error' : 'pending'
+      },
+      {
+        id: 'complete',
+        label: 'Complete',
+        status: state === 'processing' ? 'active' :
+                state === 'success' ? 'completed' :
+                state === 'error' ? 'error' : 'pending'
+      }
+    ]
+  }
 
   const paymentState = getPaymentState()
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content fade-in">
         <h2>Complete Payment</h2>
+        
+        <ProgressSteps steps={getProgressSteps()} />
         
         <div className="payment-summary">
           <p><strong>Allowances:</strong> {allowances} tons</p>
@@ -107,16 +145,21 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
         </div>
 
         {paymentState === 'ready' && (
-          <div className="payment-ready">
+          <div className="payment-ready slide-in">
             <p>Click confirm to proceed with payment</p>
-            <button onClick={handlePayment} className="confirm-payment-btn">
+            <LoadingButton 
+              onClick={handlePayment}
+              className="confirm-payment-btn"
+              variant="primary"
+            >
               Confirm Payment
-            </button>
+            </LoadingButton>
           </div>
         )}
 
         {paymentState === 'pending' && (
-          <div className="payment-pending">
+          <div className="payment-pending slide-in">
+            <LoadingSpinner size="large" />
             <p>Please confirm the transaction in your wallet...</p>
           </div>
         )}
@@ -128,36 +171,40 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
         )}
 
         {paymentState === 'confirming' && (
-          <div className="payment-confirming">
+          <div className="payment-confirming slide-in">
+            <LoadingSpinner size="large" />
             <p>Confirming transaction...</p>
-            <p>Hash: {hash}</p>
+            <p className="hash-display">Hash: {hash}</p>
           </div>
         )}
         
         {paymentState === 'confirming_payment' && (
-          <div className="payment-confirming">
+          <div className="payment-confirming slide-in">
+            <LoadingSpinner size="large" />
             <p>Confirming payment with backend...</p>
-            <p>Hash: {hash}</p>
+            <p className="hash-display">Hash: {hash}</p>
           </div>
         )}
         
         {paymentState === 'processing' && (
-          <div className="payment-processing">
+          <div className="payment-processing slide-in">
+            <LoadingSpinner size="large" />
             <p>Processing retirement...</p>
-            <p>Transaction: {hash}</p>
-            <p>Status: {orderStatus?.status}</p>
+            <p className="hash-display">Transaction: {hash}</p>
+            <p>Status: {orderStatus?.status?.replace('_', ' ')}</p>
           </div>
         )}
 
         {paymentState === 'success' && (
-          <div className="payment-success">
+          <div className="payment-success bounce">
+            <div className="success-icon">✓</div>
             <h3>Payment Successful!</h3>
             <p>Your {allowances} CO₂ allowances have been retired.</p>
-            <p>Transaction: {hash}</p>
+            <p className="hash-display">Transaction: {hash}</p>
             {orderStatus?.serial_numbers && (
-              <div>
+              <div className="serial-numbers">
                 <p><strong>Serial Numbers:</strong></p>
-                <p>{orderStatus.serial_numbers.join(', ')}</p>
+                <p className="serial-list">{orderStatus.serial_numbers.join(', ')}</p>
               </div>
             )}
             <p>
@@ -170,26 +217,31 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
                 View on Etherscan
               </a>
             </p>
-            <button onClick={onClose} className="close-btn">
+            <LoadingButton onClick={onClose} variant="primary">
               Close
-            </button>
+            </LoadingButton>
           </div>
         )}
 
         {paymentState === 'error' && (
-          <div className="payment-error">
+          <div className="payment-error slide-in">
+            <div className="error-icon">✗</div>
             <h3>Payment Failed</h3>
             <p>{confirmError || transactionError?.message || 'An error occurred'}</p>
-            <button onClick={onClose} className="close-btn">
+            <LoadingButton onClick={onClose} variant="danger">
               Close
-            </button>
+            </LoadingButton>
           </div>
         )}
 
         {paymentState !== 'success' && paymentState !== 'error' && (
-          <button onClick={onClose} className="cancel-btn">
+          <LoadingButton 
+            onClick={onClose} 
+            variant="secondary"
+            className="cancel-btn"
+          >
             Cancel
-          </button>
+          </LoadingButton>
         )}
       </div>
     </div>
