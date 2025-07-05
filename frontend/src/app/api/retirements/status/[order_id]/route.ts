@@ -3,10 +3,10 @@ import { db } from '@/lib/database';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { order_id: string } }
+  context: { params: Promise<{ order_id: string }> }
 ) {
   try {
-    const { order_id } = params;
+    const { order_id } = await context.params;
     
     if (!order_id || typeof order_id !== 'string') {
       return NextResponse.json(

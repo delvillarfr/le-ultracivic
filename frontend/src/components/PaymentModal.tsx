@@ -7,6 +7,12 @@ import { useHistory } from '@/hooks/useHistory'
 import { api, ReserveResponse, StatusResponse, pollOrderStatus } from '@/lib/api'
 import CONFIG from '@/lib/config'
 import ProgressSteps from './ui/ProgressSteps'
+
+interface Step {
+  id: string
+  label: string
+  status: 'pending' | 'active' | 'completed' | 'error'
+}
 import LoadingButton from './ui/LoadingButton'
 import LoadingSpinner from './ui/LoadingSpinner'
 
@@ -100,7 +106,7 @@ export default function PaymentModal({ isOpen, onClose, allowances, message, res
     return 'ready'
   }
   
-  const getProgressSteps = () => {
+  const getProgressSteps = (): Step[] => {
     const state = getPaymentState()
     return [
       {

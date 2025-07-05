@@ -26,6 +26,7 @@ export interface StatusResponse {
   status: 'pending' | 'paid_but_not_retired' | 'completed' | 'error';
   tx_hash?: string;
   serial_numbers?: string[];
+  reward_tx_hash?: string;
 }
 
 export interface HistoryResponse {
