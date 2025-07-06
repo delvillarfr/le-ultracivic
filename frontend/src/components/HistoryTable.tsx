@@ -30,15 +30,7 @@ export default function HistoryTable() {
           </div>
         )}
         
-        {error && (
-          <div className="table-row">
-            <div className="row-col" style={{textAlign: 'center', padding: '20px', color: '#dc3545'}}>
-              <span>Error loading history: {error}</span>
-            </div>
-          </div>
-        )}
-        
-        {!isLoading && !error && history.length === 0 && (
+        {(error || (!isLoading && history.length === 0)) && (
           <div className="table-row">
             <div className="row-col" style={{textAlign: 'center', padding: '20px'}}>
               <span>No retirements yet. Be the first!</span>

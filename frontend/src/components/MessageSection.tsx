@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import CONFIG from '@/lib/config';
 
 interface MessageSectionProps {
@@ -8,6 +9,15 @@ interface MessageSectionProps {
 export default function MessageSection({ messageValue, onMessageChange }: MessageSectionProps) {
   const maxLength = CONFIG.MAX_MESSAGE_LENGTH;
   const remaining = maxLength - messageValue.length;
+  const [hasClicked, setHasClicked] = useState(false);
+
+  const handleClick = () => {
+    setHasClicked(true);
+  };
+
+  const handleFocus = () => {
+    setHasClicked(true);
+  };
 
   return (
     <section className="message-section">
@@ -19,7 +29,9 @@ export default function MessageSection({ messageValue, onMessageChange }: Messag
         <textarea 
           value={messageValue}
           onChange={onMessageChange}
-          placeholder='And they will say, "This land that was laid waste has become like the garden of Eden" Ezekiel 36:35'
+          onClick={handleClick}
+          onFocus={handleFocus}
+          placeholder={hasClicked ? '' : 'And they will say, "This land that was laid waste has become like the garden of Eden" Ezekiel 36:35'}
           maxLength={maxLength}
         />
         {messageValue.length > 0 && (

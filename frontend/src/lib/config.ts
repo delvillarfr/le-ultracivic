@@ -20,6 +20,9 @@ export const CONFIG = {
   
   // Token reward ratio (1:1 by default)
   TOKENS_PER_ALLOWANCE: parseInt(process.env.NEXT_PUBLIC_TOKENS_PER_ALLOWANCE || '1'),
+  
+  // Social impact multiplier
+  SOCIAL_IMPACT_MULTIPLIER: 230,
 } as const
 
 export default CONFIG

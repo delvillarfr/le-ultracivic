@@ -20,10 +20,11 @@ import CONFIG from '@/lib/config';
 
 export default function Home() {
   const [allowanceValue, setAllowanceValue] = useState(CONFIG.DEFAULT_ALLOWANCES);
+  const [inputValue, setInputValue] = useState(CONFIG.DEFAULT_ALLOWANCES.toString());
   const [messageValue, setMessageValue] = useState('');
   const [priceCalc, setPriceCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.PRICE_PER_ALLOWANCE_USD);
   const [tokenCalc, setTokenCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.TOKENS_PER_ALLOWANCE);
-  const [impactCalc, setImpactCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.CO2_TONS_PER_ALLOWANCE);
+  const [impactCalc, setImpactCalc] = useState(CONFIG.DEFAULT_ALLOWANCES * CONFIG.SOCIAL_IMPACT_MULTIPLIER);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showWalletConnection, setShowWalletConnection] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -35,7 +36,7 @@ export default function Home() {
   const updateCalculations = (allowance: number) => {
     const price = allowance * CONFIG.PRICE_PER_ALLOWANCE_USD;
     const tokens = allowance * CONFIG.TOKENS_PER_ALLOWANCE;
-    const impact = allowance * CONFIG.CO2_TONS_PER_ALLOWANCE;
+    const impact = allowance * CONFIG.SOCIAL_IMPACT_MULTIPLIER;
     
     setPriceCalc(price);
     setTokenCalc(tokens);
@@ -43,14 +44,45 @@ export default function Home() {
   };
 
   const handleAllowanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = parseInt(e.target.value) || 0;
+    const rawValue = e.target.value;
     
-    if (value < CONFIG.MIN_ALLOWANCES) value = CONFIG.MIN_ALLOWANCES;
-    if (value > CONFIG.MAX_ALLOWANCES) value = CONFIG.MAX_ALLOWANCES;
+    // Prevent more than 2 digits
+    if (rawValue.length > 2) {
+      return;
+    }
     
-    setAllowanceValue(value);
-    updateCalculations(value);
-    setErrorMessage('');
+    // Always update the input display value
+    setInputValue(rawValue);
+    
+    // Allow empty string during editing
+    if (rawValue === '') {
+      setErrorMessage('');
+      return;
+    }
+    
+    // Parse the value
+    let value = parseInt(rawValue);
+    
+    // Handle NaN case - don't update anything
+    if (isNaN(value)) {
+      return;
+    }
+    
+    // Only allow values within valid range
+    if (value >= 1 && value <= 99) {
+      setAllowanceValue(value);
+      updateCalculations(value);
+      setErrorMessage('');
+    }
+  };
+
+  const handleAllowanceBlur = () => {
+    // When user finishes editing, ensure we have a valid value
+    if (inputValue === '' || parseInt(inputValue) < 1) {
+      setInputValue('1');
+      setAllowanceValue(1);
+      updateCalculations(1);
+    }
   };
 
   const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -133,7 +165,9 @@ export default function Home() {
         <Header />
         <HeroSection 
           allowanceValue={allowanceValue}
+          inputValue={inputValue}
           onAllowanceChange={handleAllowanceChange}
+          onAllowanceBlur={handleAllowanceBlur}
         />
         <ValueProps 
           priceCalc={priceCalc}

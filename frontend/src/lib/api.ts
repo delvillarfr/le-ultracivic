@@ -1,6 +1,6 @@
 // API service layer for backend calls
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api';
 
 export interface ReserveRequest {
   num_allowances: number;
@@ -10,7 +10,6 @@ export interface ReserveRequest {
 
 export interface ReserveResponse {
   order_id: string;
-  serial_numbers: string[];
 }
 
 export interface ConfirmRequest {
@@ -61,8 +60,8 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-      throw new ApiError(response.status, errorData.error || `HTTP ${response.status}`);
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+      throw new ApiError(response.status, errorData.detail || `HTTP ${response.status}`);
     }
 
     return await response.json();

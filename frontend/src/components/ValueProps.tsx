@@ -1,5 +1,3 @@
-import { useEthPrice } from '@/hooks/useEthPrice';
-
 interface ValuePropsProps {
   priceCalc: number;
   tokenCalc: number;
@@ -8,15 +6,13 @@ interface ValuePropsProps {
 }
 
 export default function ValueProps({ priceCalc, tokenCalc, impactCalc, allowanceValue }: ValuePropsProps) {
-  const { calculateEthAmount } = useEthPrice();
-  const ethAmount = calculateEthAmount(allowanceValue);
   
   return (
     <section className="value-props">
       <div className="vp-line">
         <img src="/media/vp1-1.svg" alt="Pay" className="vp1-1" />
         <span className="price-value">
-          <span>~{ethAmount?.toFixed(4) || '...'} ETH (${priceCalc.toLocaleString()})</span>
+          <span>{priceCalc.toLocaleString()}</span>
         </span>
         <img src="/media/vp1-2.svg" alt=";" className="vp1-2" />
         <img src="/media/vp2-1.svg" alt="Earn" className="vp2-1" />
