@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { atkinsonFont } from "./fonts";
 import "./globals.css";
-import { Web3Provider } from "@/components/providers/Web3Provider";
+import { ClientWrapper } from "./ClientWrapper";
 import '@rainbow-me/rainbowkit/styles.css';
 
 export const metadata: Metadata = {
@@ -17,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={atkinsonFont.variable}>
-        <Web3Provider>
+        <ClientWrapper>
           {children}
-        </Web3Provider>
+        </ClientWrapper>
       </body>
     </html>
   );
