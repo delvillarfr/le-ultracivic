@@ -21,7 +21,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
 
   return (
     <div 
-      className="modal-backdrop" 
+      className="modal-overlay" 
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}

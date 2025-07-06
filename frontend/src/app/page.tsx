@@ -177,15 +177,16 @@ export default function Home() {
       </div>
       
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <h2>What is Ultra Civic?</h2>
-        <p>Ultra Civic allows you to buy and retire polluters' legal rights to emit carbon dioxide, directly reducing global emissions.</p>
-        <p>When you purchase CO2 allowances, you:</p>
-        <ul>
-          <li>Remove pollution rights from the market permanently</li>
-          <li>Earn PR tokens as proof of your environmental impact</li>
-          <li>Leave a message for history about your contribution</li>
-        </ul>
-        <p>Each ton of CO2 allowances you retire makes a real difference in fighting climate change.</p>
+        <div className="what-modal-content">
+          <img src="/media/vgn1.svg" alt="Ultra Civic explanation 1" />
+          <img src="/media/vgn2.svg" alt="Ultra Civic explanation 2" />
+          <img src="/media/vgn3.svg" alt="Ultra Civic explanation 3" />
+          <img src="/media/vgn4.svg" alt="Ultra Civic explanation 4" />
+          <img src="/media/vgn5.svg" alt="Ultra Civic explanation 5" />
+          <img src="/media/vgn6.svg" alt="Ultra Civic explanation 6" />
+          <img src="/media/vgn7.svg" alt="Ultra Civic explanation 7" />
+          <img src="/media/vgn8.svg" alt="Ultra Civic explanation 8" />
+        </div>
       </Modal>
       
       <Modal isOpen={showWalletConnection} onClose={() => setShowWalletConnection(false)}>
