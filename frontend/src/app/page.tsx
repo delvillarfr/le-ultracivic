@@ -7,7 +7,6 @@ import HeroSection from '@/components/HeroSection';
 import ValueProps from '@/components/ValueProps';
 import MessageSection from '@/components/MessageSection';
 import Actions from '@/components/Actions';
-import HistoryTable from '@/components/HistoryTable';
 import Footer from '@/components/Footer';
 import Modal from '@/components/Modal';
 import WalletConnection from '@/components/WalletConnection';
@@ -111,18 +110,9 @@ export default function Home() {
       return;
     }
     
-    // Reserve allowances before showing payment modal
-    const reservationResult = await reserveAllowances({
-      num_allowances: allowance,
-      message: message,
-      wallet: address!
-    });
     
-    if (reservationResult) {
-      setShowPaymentModal(true);
-    } else {
-      setErrorMessage(reservationError || 'Failed to reserve allowances');
-    }
+    // For hackathon demo - skip backend reservation and go straight to payment
+    setShowPaymentModal(true);
   };
 
   const handleWhatClick = () => {
@@ -142,6 +132,10 @@ export default function Home() {
       return;
     }
     
+    // Clear any existing errors
+    setErrorMessage('');
+    
+    
     // Reserve allowances after wallet connection
     const reservationResult = await reserveAllowances({
       num_allowances: allowanceValue,
@@ -151,9 +145,8 @@ export default function Home() {
     
     if (reservationResult) {
       setShowPaymentModal(true);
-    } else {
-      setErrorMessage(reservationError || 'Failed to reserve allowances');
     }
+    // Don't show error message for reservation failure - just continue
   };
 
   useEffect(() => {
@@ -212,7 +205,6 @@ export default function Home() {
             <img src="/media/what.svg" alt="What?" className="what" />
           </LoadingButton>
         </div>
-        <HistoryTable />
         <Footer />
       </div>
       

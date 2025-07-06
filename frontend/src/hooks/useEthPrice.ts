@@ -4,30 +4,16 @@ import { useState, useEffect } from 'react'
 import CONFIG from '@/lib/config'
 
 export function useEthPrice() {
-  const [ethPriceUSD, setEthPriceUSD] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Mock price for demo - avoid external API calls
+  const [ethPriceUSD, setEthPriceUSD] = useState<number | null>(2500)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchEthPrice = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
-        const data = await response.json()
-        setEthPriceUSD(data.ethereum.usd)
-        setError(null)
-      } catch (err) {
-        setError('Failed to fetch ETH price')
-        console.error('Error fetching ETH price:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchEthPrice()
-    const interval = setInterval(fetchEthPrice, 30000) // Update every 30 seconds
-    
-    return () => clearInterval(interval)
+    // No external API calls for demo
+    setEthPriceUSD(2500) // Fixed demo price
+    setLoading(false)
+    setError(null)
   }, [])
 
   const calculateEthAmount = (allowances: number) => {

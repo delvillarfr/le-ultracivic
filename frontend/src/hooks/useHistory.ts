@@ -8,6 +8,28 @@ export function useHistory() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const addDemoEntry = (message: string, wallet: string) => {
+    // Generate mock serial numbers
+    const numAllowances = Math.floor(Math.random() * 5) + 1 // 1-5 allowances
+    const mockSerialNumbers = Array.from({ length: numAllowances }, (_, i) => 
+      `PR-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${(i + 1).toString().padStart(3, '0')}`
+    ).join(', ')
+    
+    // Generate mock transaction hash
+    const mockTxHash = `0x${Math.random().toString(16).substring(2, 42).padEnd(40, '0')}`
+    
+    const demoEntry = {
+      serial_number: mockSerialNumbers,
+      message: message || "they will say, 'This land that was laid waste has become like the garden of Eden' Ezequiel 36:35",
+      wallet: wallet,
+      timestamp: new Date().toISOString(),
+      tx_hash: mockTxHash,
+      reward_tx_hash: mockTxHash
+    }
+    
+    setHistory(prev => [demoEntry, ...prev])
+  }
+
   const fetchHistory = async () => {
     try {
       setIsLoading(true)
@@ -33,6 +55,7 @@ export function useHistory() {
     history,
     isLoading,
     error,
-    refreshHistory
+    refreshHistory,
+    addDemoEntry
   }
 }

@@ -6,9 +6,9 @@ from sqlmodel import Field, SQLModel
 
 
 class AllowanceStatus(str, Enum):
-    AVAILABLE = "available"
-    RESERVED = "reserved"
-    RETIRED = "retired"
+    AVAILABLE = "AVAILABLE"
+    RESERVED = "RESERVED"
+    RETIRED = "RETIRED"
 
 
 class Allowance(SQLModel, table=True):

@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock
 
 import pytest
+from app.models.allowances import AllowanceStatus
 
 
 @pytest.mark.smoke
@@ -20,7 +21,7 @@ def test_create_retirement_success(client, mock_session, sample_retirement_reque
     mock_result = MagicMock()
     mock_allowances = [MagicMock() for _ in range(5)]
     for allowance in mock_allowances:
-        allowance.status = "available"
+        allowance.status = AllowanceStatus.AVAILABLE
     mock_result.scalars.return_value.all.return_value = mock_allowances
     mock_session.execute.return_value = mock_result
 
@@ -98,7 +99,7 @@ def test_get_order_status_success(client, mock_session):
 
     # Mock order exists
     mock_allowance = MagicMock()
-    mock_allowance.status = "reserved"
+    mock_allowance.status = AllowanceStatus.RESERVED
     mock_allowance.message = "Test message"
     mock_allowance.serial_number = "ABC123"
 

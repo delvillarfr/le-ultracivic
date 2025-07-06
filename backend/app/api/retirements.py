@@ -7,7 +7,7 @@ from sqlmodel import select
 
 from app.database import get_session
 from app.middleware.rate_limit import limiter
-from app.models.allowances import Allowance
+from app.models.allowances import Allowance, AllowanceStatus
 from app.schemas.retirements import (
     ConfirmPaymentRequest,
     ConfirmPaymentResponse,
@@ -86,7 +86,7 @@ async def create_retirement(
         # Find and lock available allowances
         stmt = (
             select(Allowance)
-            .where(Allowance.status == "available")
+            .where(Allowance.status == AllowanceStatus.AVAILABLE)
             .limit(retirement_request.num_allowances)
             .with_for_update(skip_locked=True)
         )
@@ -104,7 +104,7 @@ async def create_retirement(
         order_id = uuid4()
 
         for allowance in allowances:
-            allowance.status = "reserved"
+            allowance.status = AllowanceStatus.RESERVED
             allowance.order_id = str(order_id)
             allowance.wallet = retirement_request.wallet
             allowance.message = retirement_request.message
@@ -152,7 +152,7 @@ async def confirm_payment(
             )
 
         first_allowance = allowances[0]
-        if first_allowance.status != "reserved":
+        if first_allowance.status != AllowanceStatus.RESERVED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Order is not in reserved status: {first_allowance.status}"
@@ -269,14 +269,14 @@ async def get_order_status(
         first_allowance = allowances[0]
 
         # Determine status based on allowance state and transaction hashes
-        if first_allowance.status == "reserved":
+        if first_allowance.status == AllowanceStatus.RESERVED:
             if first_allowance.tx_hash and first_allowance.reward_tx_hash:
                 status_value = OrderStatus.PAID_BUT_NOT_RETIRED
             elif first_allowance.tx_hash:
                 status_value = OrderStatus.PAID_BUT_NOT_RETIRED
             else:
                 status_value = OrderStatus.PENDING
-        elif first_allowance.status == "retired":
+        elif first_allowance.status == AllowanceStatus.RETIRED:
             status_value = OrderStatus.COMPLETED
         else:
             status_value = OrderStatus.ERROR
@@ -318,7 +318,7 @@ async def get_retirement_history(
         # Get all retired allowances grouped by order_id
         stmt = (
             select(Allowance)
-            .where(Allowance.status == "retired", Allowance.order_id.is_not(None))
+            .where(Allowance.status == AllowanceStatus.RETIRED, Allowance.order_id.is_not(None))
             .order_by(Allowance.updated_at.desc())
         )
         

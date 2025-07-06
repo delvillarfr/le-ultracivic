@@ -92,14 +92,14 @@ async def seed_database_with_raw_sql(database_url: str, serial_numbers: List[str
         """
         
         # Execute batch insert
-        batch_data = [(serial, 'available') for serial in serial_numbers]
+        batch_data = [(serial, 'AVAILABLE') for serial in serial_numbers]
         
         async with conn.transaction():
             await conn.executemany(insert_sql, batch_data)
         
         # Verify insertion
         final_count = await conn.fetchval(
-            "SELECT COUNT(*) FROM allowances WHERE status = 'available'"
+            "SELECT COUNT(*) FROM allowances WHERE status = 'AVAILABLE'"
         )
         
         await conn.close()
