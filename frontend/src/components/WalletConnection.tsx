@@ -11,11 +11,12 @@ interface WalletConnectionProps {
 }
 
 export default function WalletConnection({ onConnected, isConnecting = false }: WalletConnectionProps) {
-  const { isConnected } = useAccount()
+  const { isConnected, address } = useAccount()
   const chainId = useChainId()
   
-  if (isConnected && chainId === sepolia.id) {
-    onConnected()
+  if (isConnected && chainId === sepolia.id && address) {
+    // Use setTimeout to ensure all wallet state is ready
+    setTimeout(() => onConnected(), 100)
     return null
   }
   

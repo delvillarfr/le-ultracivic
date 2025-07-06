@@ -136,11 +136,17 @@ export default function Home() {
   const handleWalletConnected = async () => {
     setShowWalletConnection(false);
     
+    // Ensure we have a valid address before proceeding
+    if (!address) {
+      setErrorMessage('Wallet connection failed. Please try again.');
+      return;
+    }
+    
     // Reserve allowances after wallet connection
     const reservationResult = await reserveAllowances({
       num_allowances: allowanceValue,
       message: messageValue.trim(),
-      wallet: address!
+      wallet: address
     });
     
     if (reservationResult) {
